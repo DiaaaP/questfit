@@ -20,6 +20,7 @@ import {
   Sparkles,
   Swords,
   Target,
+  Route,
   Trophy,
   UserRound,
   UserPlus,
@@ -96,6 +97,7 @@ export function QuestFitApp() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [seasonOpen, setSeasonOpen] = useState(false);
+  const [arenaOpen, setArenaOpen] = useState(false);
   const [proEnabled, setProEnabled] = useState(false);
   const [eventJoined, setEventJoined] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -108,12 +110,12 @@ export function QuestFitApp() {
         if (!active) return;
         setUser(data.user ?? null);
         setSessionReady(true);
-        if (!data.user) window.setTimeout(() => active && setAuthOpen(true), 350);
+        if (!data.user) setEventJoined(window.localStorage.getItem("qf_guest_event_joined") === "true");
       })
       .catch(() => {
         if (!active) return;
         setSessionReady(true);
-        setAuthOpen(true);
+        setEventJoined(window.localStorage.getItem("qf_guest_event_joined") === "true");
       });
     return () => {
       active = false;
@@ -265,9 +267,12 @@ export function QuestFitApp() {
 
   async function toggleEvent() {
     if (!user) {
-      setAuthMode("register");
-      setAuthOpen(true);
-      toast("Нужен аккаунт", { description: "После регистрации место на старте сохранится за вами." });
+      const nextValue = !eventJoined;
+      setEventJoined(nextValue);
+      window.localStorage.setItem("qf_guest_event_joined", String(nextValue));
+      toast.success(nextValue ? "Место на Night Run закреплено" : "Запись на Night Run отменена", {
+        description: nextValue ? "Гостевая запись сохранена на этом устройстве." : "Можно вернуться в список в любой момент.",
+      });
       return;
     }
     if (actionLoading) return;
@@ -330,7 +335,7 @@ export function QuestFitApp() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
     setCompleted([3]);
-    setEventJoined(false);
+    setEventJoined(window.localStorage.getItem("qf_guest_event_joined") === "true");
     setAuthMode("login");
     setAuthOpen(true);
     toast("Вы вышли из аккаунта");
@@ -466,7 +471,11 @@ export function QuestFitApp() {
             <h3>Night Run: Урал</h3>
             <p><MapPin aria-hidden="true" /> Набережная · 10 км</p>
             <div className="qf-arena-meta"><span><small>СТАРТ</small><b>19:30</b></span><span><small>ИГРОКОВ</small><b>{eventJoined ? 287 : 286}</b></span><span><small>НАГРАДА</small><b>1 200 XP</b></span></div>
-            <button className={eventJoined ? "joined" : ""} disabled={actionLoading === "event"} onClick={toggleEvent}><ShieldCheck aria-hidden="true" /> {eventJoined ? "Вы участвуете · отменить" : "Записаться"}</button>
+            <div className="qf-arena-status"><span>{eventJoined ? "Место закреплено" : "Регистрация открыта"}</span><small>Сегодня · городской зачёт</small></div>
+            <div className="qf-arena-actions">
+              <button className="secondary" onClick={() => setArenaOpen(true)}><Route aria-hidden="true" /> Маршрут</button>
+              <button className={eventJoined ? "joined" : ""} disabled={actionLoading === "event"} onClick={toggleEvent}><ShieldCheck aria-hidden="true" /> {eventJoined ? "Отменить участие" : "Участвовать"}</button>
+            </div>
           </article>
         </section>
 
@@ -500,6 +509,26 @@ export function QuestFitApp() {
           <div className="qf-profile-card"><span className="qf-profile-avatar"><UserRound aria-hidden="true" /></span><div><b>{user?.fullName}</b><p>{user?.email}</p><small>{user?.goal}</small></div></div>
           <div className="qf-profile-stats"><span><b>24</b><small>уровень</small></span><span><b>{completed.length}</b><small>квеста сегодня</small></span><span><b>12</b><small>дней серии</small></span></div>
           <Button className="qf-sheet-action" onClick={() => { setProfileOpen(false); navigateTo("#quests"); }}>Перейти к квестам</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={arenaOpen} onOpenChange={setArenaOpen}>
+        <DialogContent className="qf-info-dialog qf-arena-dialog">
+          <DialogHeader><DialogTitle>Night Run: Урал</DialogTitle><DialogDescription>Городской ночной забег на 10 км. Старт сегодня в 19:30.</DialogDescription></DialogHeader>
+          <div className="qf-arena-brief">
+            <span><MapPin aria-hidden="true" /></span>
+            <div><b>Набережная городского пруда</b><p>Сбор участников с 18:45 у главной сцены.</p></div>
+            <strong>{eventJoined ? "ВЫ В ИГРЕ" : "286 ИГРОКОВ"}</strong>
+          </div>
+          <div className="qf-route-list">
+            <div><span>1</span><p><b>Старт · 0 км</b><small>Главная сцена, разминка команды</small></p></div>
+            <div><span>2</span><p><b>Чекпоинт · 5 км</b><small>Вода, фиксация времени и +300 XP</small></p></div>
+            <div><span>3</span><p><b>Финиш · 10 км</b><small>Медаль сезона и 1 200 XP</small></p></div>
+          </div>
+          <div className="qf-arena-dialog-actions">
+            <Button className="qf-sheet-action" disabled={actionLoading === "event"} onClick={toggleEvent}>{eventJoined ? "Отменить участие" : "Занять место"}</Button>
+            {!user && <button onClick={() => { setArenaOpen(false); setAuthMode("register"); setAuthOpen(true); }}>Создать аккаунт и сохранить прогресс</button>}
+          </div>
         </DialogContent>
       </Dialog>
 
