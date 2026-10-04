@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable(
   "users",
@@ -28,4 +28,28 @@ export const sessions = sqliteTable(
     index("idx_sessions_user_id").on(table.userId),
     index("idx_sessions_expires_at").on(table.expiresAt),
   ],
+);
+
+export const questProgress = sqliteTable(
+  "quest_progress",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    questId: integer("quest_id").notNull(),
+    completedAt: integer("completed_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.questId] })],
+);
+
+export const eventRegistrations = sqliteTable(
+  "event_registrations",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    eventSlug: text("event_slug").notNull(),
+    registeredAt: integer("registered_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.eventSlug] })],
 );

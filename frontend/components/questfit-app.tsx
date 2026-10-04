@@ -8,8 +8,10 @@ import {
   Clock3,
   Dumbbell,
   Flame,
+  HelpCircle,
   LayoutDashboard,
   LogOut,
+  Mail,
   MapPin,
   Medal,
   Menu,
@@ -19,6 +21,7 @@ import {
   Swords,
   Target,
   Trophy,
+  UserRound,
   UserPlus,
   Users,
   X,
@@ -36,6 +39,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -79,6 +90,15 @@ export function QuestFitApp() {
   const [authMode, setAuthMode] = useState("register");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [activeSection, setActiveSection] = useState("overview");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsRead, setNotificationsRead] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [seasonOpen, setSeasonOpen] = useState(false);
+  const [proEnabled, setProEnabled] = useState(false);
+  const [eventJoined, setEventJoined] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -98,6 +118,47 @@ export function QuestFitApp() {
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    fetch("/api/activity")
+      .then(async (response) => {
+        const result = (await response.json()) as {
+          completedQuestIds?: number[];
+          registeredForEvent?: boolean;
+          error?: string;
+        };
+        if (!response.ok) throw new Error(result.error ?? "Не удалось загрузить прогресс.");
+        return result;
+      })
+      .then((result) => {
+        if (!active) return;
+        setCompleted(result.completedQuestIds ?? []);
+        setEventJoined(Boolean(result.registeredForEvent));
+      })
+      .catch(() => active && toast.error("Не удалось загрузить сохранённый прогресс"));
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const sections = navItems
+      .map((item) => document.getElementById(item.href.slice(1)))
+      .filter((section): section is HTMLElement => Boolean(section));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target.id) setActiveSection(visible.target.id);
+      },
+      { rootMargin: "-22% 0px -60% 0px", threshold: [0, 0.15, 0.4] },
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -124,12 +185,19 @@ export function QuestFitApp() {
             additionalProperties: false,
           },
           annotations: { readOnlyHint: false, untrustedContentHint: false },
-          execute(input: unknown) {
+          async execute(input: unknown) {
             const questId = Number((input as { questId?: unknown })?.questId);
             const quest = quests.find((item) => item.id === questId);
             if (!quest || !Number.isInteger(questId)) throw new Error("Неизвестный квест.");
             setCompleted((current) => (current.includes(questId) ? current : [...current, questId]));
-            return { questId, title: quest.title, status: "completed", xp: quest.xp };
+            if (user) {
+              await fetch("/api/activity", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "quest", questId, completed: true }),
+              });
+            }
+            return { questId, title: quest.title, status: "completed", xp: quest.xp, saved: Boolean(user) };
           },
         },
         { signal: lifecycle.signal },
@@ -137,7 +205,7 @@ export function QuestFitApp() {
     ).catch(() => undefined);
 
     return () => lifecycle.abort();
-  }, []);
+  }, [user]);
 
   const xp = 6840 + completed.length * 140;
   const levelProgress = Math.min(94, 66 + completed.length * 5);
@@ -152,12 +220,78 @@ export function QuestFitApp() {
     [],
   );
 
-  function toggleQuest(id: number, title: string) {
-    setCompleted((current) => {
-      if (current.includes(id)) return current.filter((questId) => questId !== id);
-      toast.success(`Квест «${title}» закрыт`, { description: "Опыт уже добавлен к уровню." });
-      return [...current, id];
-    });
+  function navigateTo(href: string) {
+    const id = href.slice(1);
+    setActiveSection(id);
+    setMobileOpen(false);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function toggleQuest(id: number, title: string) {
+    if (actionLoading) return;
+    const wasCompleted = completed.includes(id);
+    const nextCompleted = wasCompleted
+      ? completed.filter((questId) => questId !== id)
+      : [...completed, id];
+    setCompleted(nextCompleted);
+
+    if (!user) {
+      toast(wasCompleted ? "Квест снова активен" : `Квест «${title}» закрыт`, {
+        description: "Войдите, чтобы сохранить результат между устройствами.",
+      });
+      return;
+    }
+
+    setActionLoading(`quest-${id}`);
+    try {
+      const response = await fetch("/api/activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "quest", questId: id, completed: !wasCompleted }),
+      });
+      const result = (await response.json()) as { completedQuestIds?: number[]; error?: string };
+      if (!response.ok) throw new Error(result.error ?? "Не удалось сохранить квест.");
+      setCompleted(result.completedQuestIds ?? nextCompleted);
+      toast.success(wasCompleted ? "Квест возвращён в список" : `Квест «${title}» закрыт`, {
+        description: wasCompleted ? "XP пересчитан." : "Опыт сохранён в вашем профиле.",
+      });
+    } catch (error) {
+      setCompleted(completed);
+      toast.error(error instanceof Error ? error.message : "Не удалось сохранить квест.");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function toggleEvent() {
+    if (!user) {
+      setAuthMode("register");
+      setAuthOpen(true);
+      toast("Нужен аккаунт", { description: "После регистрации место на старте сохранится за вами." });
+      return;
+    }
+    if (actionLoading) return;
+    const nextValue = !eventJoined;
+    setEventJoined(nextValue);
+    setActionLoading("event");
+    try {
+      const response = await fetch("/api/activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "event", registered: nextValue }),
+      });
+      const result = (await response.json()) as { registeredForEvent?: boolean; error?: string };
+      if (!response.ok) throw new Error(result.error ?? "Не удалось обновить запись.");
+      setEventJoined(Boolean(result.registeredForEvent));
+      toast.success(nextValue ? "Вы в списке участников" : "Запись отменена", {
+        description: nextValue ? "Напомним за два часа до старта." : "Место снова доступно другим игрокам.",
+      });
+    } catch (error) {
+      setEventJoined(!nextValue);
+      toast.error(error instanceof Error ? error.message : "Не удалось обновить запись.");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function submitAuth(event: FormEvent<HTMLFormElement>, mode: "register" | "login") {
@@ -195,6 +329,8 @@ export function QuestFitApp() {
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
+    setCompleted([3]);
+    setEventJoined(false);
     setAuthMode("login");
     setAuthOpen(true);
     toast("Вы вышли из аккаунта");
@@ -216,26 +352,26 @@ export function QuestFitApp() {
 
         <p className="qf-nav-label">Игра</p>
         <nav className="qf-nav" aria-label="Основная навигация">
-          {navItems.map(({ href, label, icon: Icon }, index) => (
-            <a key={href} href={href} className={index === 0 ? "active" : ""} onClick={() => setMobileOpen(false)}>
+          {navItems.map(({ href, label, icon: Icon }) => (
+            <a key={href} href={href} className={activeSection === href.slice(1) ? "active" : ""} onClick={(event) => { event.preventDefault(); navigateTo(href); }}>
               <Icon aria-hidden="true" /><span>{label}</span>
             </a>
           ))}
         </nav>
 
         <div className="qf-sidebar-spacer" />
-        <div className="qf-sidebar-card">
+        <button className="qf-sidebar-card" onClick={() => setSeasonOpen(true)} aria-label="Открыть прогресс PRO-сезона">
           <Sparkles aria-hidden="true" />
           <strong>PRO-сезон 04</strong>
-          <span>В топ-12% игроков</span>
+          <span>{proEnabled ? "PRO-режим активен" : "В топ-12% игроков"}</span>
           <Progress value={72} className="qf-mini-progress" aria-label="Прогресс сезона: 72%" />
-        </div>
-        <a className="qf-support-link" href="mailto:support@questfit.app">Помощь и поддержка</a>
+        </button>
+        <button className="qf-support-link" onClick={() => setSupportOpen(true)}><HelpCircle aria-hidden="true" /> Помощь и поддержка</button>
       </aside>
 
       {mobileOpen && <button className="qf-scrim" onClick={() => setMobileOpen(false)} aria-label="Закрыть меню" />}
 
-      <main className="qf-main" id="overview">
+      <main className="qf-main">
         <header className="qf-topbar">
           <div className="qf-heading-row">
             <button className="qf-menu-button" onClick={() => setMobileOpen(true)} aria-label="Открыть меню">
@@ -247,11 +383,13 @@ export function QuestFitApp() {
             </div>
           </div>
           <div className="qf-top-actions">
-            <button className="qf-icon-button" aria-label="Уведомления"><Bell aria-hidden="true" /><i /></button>
+            <button className="qf-icon-button" onClick={() => setNotificationsOpen(true)} aria-label="Уведомления"><Bell aria-hidden="true" />{!notificationsRead && <i />}</button>
             {user ? (
               <div className="qf-account">
-                <span className="qf-avatar">{user.fullName.slice(0, 1).toUpperCase()}</span>
-                <span><b>{firstName}</b><small>ур. 24</small></span>
+                <button className="qf-profile-trigger" onClick={() => setProfileOpen(true)} aria-label="Открыть профиль">
+                  <span className="qf-avatar">{user.fullName.slice(0, 1).toUpperCase()}</span>
+                  <span><b>{firstName}</b><small>ур. 24</small></span>
+                </button>
                 <button onClick={logout} aria-label="Выйти"><LogOut aria-hidden="true" /></button>
               </div>
             ) : (
@@ -262,7 +400,7 @@ export function QuestFitApp() {
           </div>
         </header>
 
-        <section className="qf-hero-grid" aria-label="Прогресс за сегодня">
+        <section className="qf-hero-grid" id="overview" aria-label="Прогресс за сегодня">
           <article className="qf-level-card">
             <div className="qf-level-copy">
               <span className="qf-eyebrow"><Zap aria-hidden="true" /> Личный прогресс</span>
@@ -295,7 +433,7 @@ export function QuestFitApp() {
                 <article key={quest.id} className={`qf-quest-card ${done ? "done" : ""}`}>
                   <span className={`qf-quest-icon ${quest.tone}`}><Icon aria-hidden="true" /></span>
                   <div className="qf-quest-copy"><h3>{quest.title}</h3><p>{quest.detail}</p><b>+{quest.xp} XP</b></div>
-                  <button onClick={() => toggleQuest(quest.id, quest.title)} aria-label={done ? `Вернуть квест ${quest.title}` : `Завершить квест ${quest.title}`}>
+                  <button disabled={actionLoading === `quest-${quest.id}`} onClick={() => toggleQuest(quest.id, quest.title)} aria-label={done ? `Вернуть квест ${quest.title}` : `Завершить квест ${quest.title}`}>
                     {done ? <Check aria-hidden="true" /> : <span />}
                   </button>
                 </article>
@@ -327,8 +465,8 @@ export function QuestFitApp() {
             <div className="qf-panel-head"><div><span className="qf-kicker">ARENA</span><h2>Ближайший старт</h2></div><Trophy aria-hidden="true" /></div>
             <h3>Night Run: Урал</h3>
             <p><MapPin aria-hidden="true" /> Набережная · 10 км</p>
-            <div className="qf-arena-meta"><span><small>СТАРТ</small><b>19:30</b></span><span><small>ИГРОКОВ</small><b>286</b></span><span><small>НАГРАДА</small><b>1 200 XP</b></span></div>
-            <button onClick={() => toast.success("Вы в списке участников", { description: "Напомним за два часа до старта." })}><ShieldCheck aria-hidden="true" /> Записаться</button>
+            <div className="qf-arena-meta"><span><small>СТАРТ</small><b>19:30</b></span><span><small>ИГРОКОВ</small><b>{eventJoined ? 287 : 286}</b></span><span><small>НАГРАДА</small><b>1 200 XP</b></span></div>
+            <button className={eventJoined ? "joined" : ""} disabled={actionLoading === "event"} onClick={toggleEvent}><ShieldCheck aria-hidden="true" /> {eventJoined ? "Вы участвуете · отменить" : "Записаться"}</button>
           </article>
         </section>
 
@@ -336,8 +474,51 @@ export function QuestFitApp() {
       </main>
 
       <nav className="qf-mobile-nav" aria-label="Мобильная навигация">
-        {navItems.map(({ href, label, icon: Icon }) => <a key={href} href={href}><Icon aria-hidden="true" /><span>{label}</span></a>)}
+        {navItems.map(({ href, label, icon: Icon }) => <a key={href} href={href} className={activeSection === href.slice(1) ? "active" : ""} onClick={(event) => { event.preventDefault(); navigateTo(href); }}><Icon aria-hidden="true" /><span>{label}</span></a>)}
       </nav>
+
+      <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+        <SheetContent className="qf-notification-sheet">
+          <SheetHeader>
+            <SheetTitle>Центр событий</SheetTitle>
+            <SheetDescription>Всё важное по серии, команде и ближайшим стартам.</SheetDescription>
+          </SheetHeader>
+          <div className="qf-notification-list">
+            <article className={!notificationsRead ? "unread" : ""}><Flame aria-hidden="true" /><div><b>Серия держится 12 дней</b><p>Закройте ещё два квеста до полуночи.</p><small>7 минут назад</small></div></article>
+            <article><Users aria-hidden="true" /><div><b>Отряд прошёл ещё 6 км</b><p>До награды «Железного колосса» осталось 22 км.</p><small>42 минуты назад</small></div></article>
+            <article><Trophy aria-hidden="true" /><div><b>Night Run уже близко</b><p>Старт сегодня в 19:30 на набережной.</p><small>2 часа назад</small></div></article>
+          </div>
+          <SheetFooter>
+            <Button className="qf-sheet-action" onClick={() => { setNotificationsRead(true); toast.success("Все уведомления прочитаны"); }}>Прочитать всё</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="qf-info-dialog">
+          <DialogHeader><DialogTitle>Профиль игрока</DialogTitle><DialogDescription>Ваши данные и текущая игровая форма.</DialogDescription></DialogHeader>
+          <div className="qf-profile-card"><span className="qf-profile-avatar"><UserRound aria-hidden="true" /></span><div><b>{user?.fullName}</b><p>{user?.email}</p><small>{user?.goal}</small></div></div>
+          <div className="qf-profile-stats"><span><b>24</b><small>уровень</small></span><span><b>{completed.length}</b><small>квеста сегодня</small></span><span><b>12</b><small>дней серии</small></span></div>
+          <Button className="qf-sheet-action" onClick={() => { setProfileOpen(false); navigateTo("#quests"); }}>Перейти к квестам</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={seasonOpen} onOpenChange={setSeasonOpen}>
+        <DialogContent className="qf-info-dialog">
+          <DialogHeader><DialogTitle>PRO-сезон 04</DialogTitle><DialogDescription>72% пути пройдено. Следующая награда — редкая рамка профиля.</DialogDescription></DialogHeader>
+          <div className="qf-season-progress"><div><span>Ваш прогресс</span><b>7 240 / 10 000 XP</b></div><Progress value={72} className="qf-level-progress" /></div>
+          <div className="qf-benefit-list"><p><Check aria-hidden="true" /> Двойной XP по выходным</p><p><Check aria-hidden="true" /> Закрытые командные рейды</p><p><Check aria-hidden="true" /> Три редкие награды сезона</p></div>
+          <Button className="qf-sheet-action" onClick={() => { setProEnabled((value) => !value); setSeasonOpen(false); toast.success(proEnabled ? "PRO-режим выключен" : "PRO-режим включён"); }}>{proEnabled ? "Выключить PRO-режим" : "Включить PRO-режим"}</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={supportOpen} onOpenChange={setSupportOpen}>
+        <DialogContent className="qf-info-dialog">
+          <DialogHeader><DialogTitle>Помощь и поддержка</DialogTitle><DialogDescription>Ответим по аккаунту, прогрессу или участию в стартах.</DialogDescription></DialogHeader>
+          <div className="qf-support-options"><button onClick={() => { void navigator.clipboard.writeText("support@questfit.app"); toast.success("Адрес поддержки скопирован"); }}><Mail aria-hidden="true" /><span><b>Скопировать почту</b><small>support@questfit.app</small></span></button><button onClick={() => { setSupportOpen(false); toast("Подсказка", { description: "Квест можно снять повторным нажатием на отметку." }); }}><HelpCircle aria-hidden="true" /><span><b>Как отменить квест?</b><small>Показать быструю подсказку</small></span></button></div>
+          <a className="qf-mail-action" href="mailto:support@questfit.app?subject=QuestFit%20Support">Написать в поддержку</a>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={authOpen} onOpenChange={setAuthOpen}>
         <DialogContent className="qf-auth-dialog" onOpenAutoFocus={(event) => event.preventDefault()}>
