@@ -58,6 +58,31 @@ type User = {
   goal: string;
 };
 
+type StaticAccount = {
+  user: User;
+  passwordHash: string;
+};
+
+const staticKeys = {
+  account: "qf_pages_account",
+  session: "qf_pages_session",
+  completed: "qf_pages_completed",
+  event: "qf_pages_event_joined",
+};
+
+function isGitHubPages() {
+  return (
+    typeof window !== "undefined" &&
+    (window.location.hostname.endsWith("github.io") || document.documentElement.dataset.deployment === "github-pages")
+  );
+}
+
+async function hashPassword(password: string) {
+  const bytes = new TextEncoder().encode(password);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 const quests = [
   { id: 1, icon: Dumbbell, title: "Силовой импульс", detail: "45 минут · верх тела", xp: 240, tone: "ember" },
   { id: 2, icon: Activity, title: "Кардио-разгон", detail: "Пробеги 5 км", xp: 320, tone: "blue" },
@@ -105,6 +130,20 @@ export function QuestFitApp() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isGitHubPages()) {
+      try {
+        const account = JSON.parse(window.localStorage.getItem(staticKeys.account) ?? "null") as StaticAccount | null;
+        const hasSession = window.localStorage.getItem(staticKeys.session) === "true";
+        if (account && hasSession) setUser(account.user);
+        const savedCompleted = JSON.parse(window.localStorage.getItem(staticKeys.completed) ?? "[3]") as number[];
+        setCompleted(Array.isArray(savedCompleted) ? savedCompleted : [3]);
+        setEventJoined(window.localStorage.getItem(staticKeys.event) === "true");
+      } catch {
+        setCompleted([3]);
+      }
+      setSessionReady(true);
+      return;
+    }
     let active = true;
     fetch("/api/auth/session")
       .then(async (response) => (await response.json()) as { user?: User | null })
@@ -126,6 +165,7 @@ export function QuestFitApp() {
 
   useEffect(() => {
     if (!user) return;
+    if (isGitHubPages()) return;
     let active = true;
     fetch("/api/activity")
       .then(async (response) => {
@@ -193,9 +233,13 @@ export function QuestFitApp() {
             const questId = Number((input as { questId?: unknown })?.questId);
             const quest = quests.find((item) => item.id === questId);
             if (!quest || !Number.isInteger(questId)) throw new Error("Неизвестный квест.");
-            setCompleted((current) => (current.includes(questId) ? current : [...current, questId]));
+            setCompleted((current) => {
+              const next = current.includes(questId) ? current : [...current, questId];
+              if (user && isGitHubPages()) window.localStorage.setItem(staticKeys.completed, JSON.stringify(next));
+              return next;
+            });
             if (user) {
-              await fetch("/api/activity", {
+              if (!isGitHubPages()) await fetch("/api/activity", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "quest", questId, completed: true }),
@@ -248,6 +292,14 @@ export function QuestFitApp() {
       return;
     }
 
+    if (isGitHubPages()) {
+      window.localStorage.setItem(staticKeys.completed, JSON.stringify(nextCompleted));
+      toast.success(wasCompleted ? "Квест возвращён в список" : `Квест «${title}» закрыт`, {
+        description: "Прогресс сохранён в этом браузере.",
+      });
+      return;
+    }
+
     setActionLoading(`quest-${id}`);
     try {
       const response = await fetch("/api/activity", {
@@ -276,6 +328,15 @@ export function QuestFitApp() {
       window.localStorage.setItem("qf_guest_event_joined", String(nextValue));
       toast.success(nextValue ? "Место на Night Run закреплено" : "Запись на Night Run отменена", {
         description: nextValue ? "Гостевая запись сохранена на этом устройстве." : "Можно вернуться в список в любой момент.",
+      });
+      return;
+    }
+    if (isGitHubPages()) {
+      const nextValue = !eventJoined;
+      setEventJoined(nextValue);
+      window.localStorage.setItem(staticKeys.event, String(nextValue));
+      toast.success(nextValue ? "Вы в списке участников" : "Запись отменена", {
+        description: "Статус сохранён в этом браузере.",
       });
       return;
     }
@@ -316,6 +377,36 @@ export function QuestFitApp() {
     };
 
     try {
+      if (isGitHubPages()) {
+        const fullName = String(payload.fullName ?? "").trim();
+        const email = String(payload.email ?? "").trim().toLowerCase();
+        const password = String(payload.password ?? "");
+        const savedAccount = JSON.parse(window.localStorage.getItem(staticKeys.account) ?? "null") as StaticAccount | null;
+        const passwordHash = await hashPassword(password);
+
+        let nextUser: User;
+        if (mode === "register") {
+          if (fullName.length < 2) throw new Error("Укажите имя.");
+          if (!email.includes("@")) throw new Error("Проверьте адрес почты.");
+          if (password.length < 6) throw new Error("Пароль должен содержать минимум 6 символов.");
+          nextUser = { id: Date.now(), fullName, email, goal: payload.goal };
+          window.localStorage.setItem(staticKeys.account, JSON.stringify({ user: nextUser, passwordHash } satisfies StaticAccount));
+        } else {
+          if (!savedAccount || savedAccount.user.email.toLowerCase() !== email || savedAccount.passwordHash !== passwordHash) {
+            throw new Error("Неверная почта или пароль.");
+          }
+          nextUser = savedAccount.user;
+        }
+
+        window.localStorage.setItem(staticKeys.session, "true");
+        setUser(nextUser);
+        setAuthOpen(false);
+        toast.success(mode === "register" ? "Добро пожаловать в QuestFit" : "С возвращением", {
+          description: `${nextUser.fullName}, прогресс сохраняется в этом браузере.`,
+        });
+        return;
+      }
+
       const response = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -336,10 +427,13 @@ export function QuestFitApp() {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    if (isGitHubPages()) window.localStorage.removeItem(staticKeys.session);
+    else await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
     setCompleted([3]);
-    setEventJoined(window.localStorage.getItem("qf_guest_event_joined") === "true");
+    setEventJoined(
+      window.localStorage.getItem(isGitHubPages() ? staticKeys.event : "qf_guest_event_joined") === "true",
+    );
     setAuthMode("login");
     setAuthOpen(true);
     toast("Вы вышли из аккаунта");
