@@ -92,12 +92,12 @@ async function issueSession(user: PublicUser) {
   return { user, token };
 }
 
-export function sessionCookie(token: string) {
-  return `qf_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_SECONDS}`;
+export function sessionCookie(token: string, secure = true) {
+  return `qf_session=${token}; Path=/; HttpOnly;${secure ? " Secure;" : ""} SameSite=Lax; Max-Age=${SESSION_SECONDS}`;
 }
 
-export function clearSessionCookie() {
-  return "qf_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+export function clearSessionCookie(secure = true) {
+  return `qf_session=; Path=/; HttpOnly;${secure ? " Secure;" : ""} SameSite=Lax; Max-Age=0`;
 }
 
 export function readSessionToken(request: Request) {

@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     const { user, token } = await loginAccount(await request.json());
     return Response.json(
       { user },
-      { headers: { "Set-Cookie": sessionCookie(token) } },
+      { headers: { "Set-Cookie": sessionCookie(token, new URL(request.url).protocol === "https:") } },
     );
   } catch (error) {
     if (error instanceof AuthError) {

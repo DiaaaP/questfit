@@ -6,5 +6,8 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("QuestFit logout failed", error);
   }
-  return Response.json({ ok: true }, { headers: { "Set-Cookie": clearSessionCookie() } });
+  return Response.json(
+    { ok: true },
+    { headers: { "Set-Cookie": clearSessionCookie(new URL(request.url).protocol === "https:") } },
+  );
 }

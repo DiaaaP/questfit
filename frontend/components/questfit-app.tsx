@@ -16,6 +16,7 @@ import {
   Medal,
   Menu,
   ScrollText,
+  Settings,
   ShieldCheck,
   Sparkles,
   Swords,
@@ -50,6 +51,15 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
+import { ProgressSection } from "@/frontend/components/progress-section";
+import {
+  buildDashboard,
+  calculateWorkoutXp,
+  type DashboardData,
+  type NewWorkoutInput,
+  type ProfilePreferences,
+  type WorkoutEntry,
+} from "@/shared/questfit";
 
 type User = {
   id: number;
@@ -68,6 +78,7 @@ const staticKeys = {
   session: "qf_pages_session",
   completed: "qf_pages_completed",
   event: "qf_pages_event_joined",
+  dashboard: "qf_pages_dashboard",
 };
 
 function isGitHubPages() {
@@ -93,6 +104,7 @@ const quests = [
 const navItems = [
   { href: "#overview", label: "Обзор", icon: LayoutDashboard },
   { href: "#quests", label: "Квесты", icon: ScrollText },
+  { href: "#progress", label: "Прогресс", icon: Activity },
   { href: "#squad", label: "Команда", icon: Users },
   { href: "#arena", label: "Арена", icon: Trophy },
 ];
@@ -121,6 +133,9 @@ export function QuestFitApp() {
   const [notificationsRead, setNotificationsRead] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [seasonOpen, setSeasonOpen] = useState(false);
   const [arenaOpen, setArenaOpen] = useState(false);
   const [squadOpen, setSquadOpen] = useState(false);
@@ -128,7 +143,9 @@ export function QuestFitApp() {
   const [proEnabled, setProEnabled] = useState(false);
   const [eventJoined, setEventJoined] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData>(() => buildDashboard());
 
+  /* eslint-disable react-hooks/set-state-in-effect -- GitHub Pages demo state is hydrated from browser storage after mount. */
   useEffect(() => {
     if (isGitHubPages()) {
       try {
@@ -138,6 +155,12 @@ export function QuestFitApp() {
         const savedCompleted = JSON.parse(window.localStorage.getItem(staticKeys.completed) ?? "[3]") as number[];
         setCompleted(Array.isArray(savedCompleted) ? savedCompleted : [3]);
         setEventJoined(window.localStorage.getItem(staticKeys.event) === "true");
+        const savedDashboard = JSON.parse(window.localStorage.getItem(staticKeys.dashboard) ?? "null") as DashboardData | null;
+        setDashboard(buildDashboard(
+          savedDashboard?.workouts,
+          savedDashboard?.preferences,
+          account?.user.fullName.split(" ")[0] ?? "Атлет",
+        ));
       } catch {
         setCompleted([3]);
       }
@@ -162,6 +185,7 @@ export function QuestFitApp() {
       active = false;
     };
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!user) return;
@@ -189,20 +213,49 @@ export function QuestFitApp() {
   }, [user]);
 
   useEffect(() => {
+    if (!user || isGitHubPages()) return;
+    let active = true;
+    fetch("/api/dashboard")
+      .then(async (response) => {
+        const result = (await response.json()) as DashboardData & { error?: string };
+        if (!response.ok) throw new Error(result.error ?? "Не удалось загрузить аналитику.");
+        return result;
+      })
+      .then((result) => active && setDashboard(result))
+      .catch(() => active && toast.error("Не удалось загрузить историю тренировок"));
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
     const sections = navItems
       .map((item) => document.getElementById(item.href.slice(1)))
       .filter((section): section is HTMLElement => Boolean(section));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible?.target.id) setActiveSection(visible.target.id);
-      },
-      { rootMargin: "-22% 0px -60% 0px", threshold: [0, 0.15, 0.4] },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    let frame = 0;
+    const updateActiveSection = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const marker = window.innerHeight * 0.32;
+        let current = sections[0]?.id ?? "overview";
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top <= marker) current = section.id;
+          else break;
+        }
+        if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) {
+          current = sections.at(-1)?.id ?? current;
+        }
+        setActiveSection(current);
+      });
+    };
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
   }, []);
 
   useEffect(() => {
@@ -364,6 +417,110 @@ export function QuestFitApp() {
     }
   }
 
+  async function createWorkoutEntry(input: NewWorkoutInput) {
+    if (!user) {
+      setAuthMode("register");
+      setAuthOpen(true);
+      throw new Error("Создайте аккаунт, чтобы вести историю тренировок.");
+    }
+
+    if (isGitHubPages()) {
+      const workout: WorkoutEntry = {
+        id: Date.now(),
+        ...input,
+        xp: calculateWorkoutXp(input),
+      };
+      setDashboard((current) => {
+        const next = buildDashboard([workout, ...current.workouts], current.preferences, firstName);
+        window.localStorage.setItem(staticKeys.dashboard, JSON.stringify(next));
+        return next;
+      });
+      toast.success("Тренировка записана", { description: `+${workout.xp} XP добавлено в прогресс.` });
+      return;
+    }
+
+    const response = await fetch("/api/workouts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const result = (await response.json()) as { workout?: WorkoutEntry; error?: string };
+    if (!response.ok || !result.workout) throw new Error(result.error ?? "Не удалось записать тренировку.");
+    setDashboard((current) => buildDashboard([result.workout!, ...current.workouts], current.preferences, firstName));
+    toast.success("Тренировка записана", { description: `+${result.workout.xp} XP добавлено в прогресс.` });
+  }
+
+  async function deleteWorkoutEntry(workoutId: number) {
+    if (isGitHubPages()) {
+      setDashboard((current) => {
+        const next = buildDashboard(current.workouts.filter((workout) => workout.id !== workoutId), current.preferences, firstName);
+        window.localStorage.setItem(staticKeys.dashboard, JSON.stringify(next));
+        return next;
+      });
+      toast("Тренировка удалена");
+      return;
+    }
+    if (!user) return;
+    const response = await fetch(`/api/workouts?id=${workoutId}`, { method: "DELETE" });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      toast.error(result.error ?? "Не удалось удалить тренировку.");
+      return;
+    }
+    setDashboard((current) => buildDashboard(current.workouts.filter((workout) => workout.id !== workoutId), current.preferences, firstName));
+    toast("Тренировка удалена");
+  }
+
+  async function saveProfileSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!user) return;
+    setProfileSaving(true);
+    setProfileError("");
+    const form = new FormData(event.currentTarget);
+    const fullName = String(form.get("fullName") ?? "").trim();
+    const goal = String(form.get("goal") ?? "").trim();
+    const preferences: ProfilePreferences = {
+      city: String(form.get("city") ?? "").trim(),
+      weeklyGoalMinutes: Number(form.get("weeklyGoalMinutes")),
+      notificationsEnabled: form.get("notificationsEnabled") === "on",
+    };
+
+    try {
+      if (fullName.length < 2 || goal.length < 2 || preferences.city.length < 2 || preferences.weeklyGoalMinutes < 60) {
+        throw new Error("Заполните имя, город, цель и недельный план.");
+      }
+      if (isGitHubPages()) {
+        const savedAccount = JSON.parse(window.localStorage.getItem(staticKeys.account) ?? "null") as StaticAccount | null;
+        const nextUser = { ...user, fullName, goal };
+        if (savedAccount) {
+          window.localStorage.setItem(staticKeys.account, JSON.stringify({ ...savedAccount, user: nextUser }));
+        }
+        setUser(nextUser);
+        setDashboard((current) => {
+          const next = buildDashboard(current.workouts, preferences, fullName.split(" ")[0]);
+          window.localStorage.setItem(staticKeys.dashboard, JSON.stringify(next));
+          return next;
+        });
+      } else {
+        const response = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName, goal, ...preferences }),
+        });
+        const result = (await response.json()) as { user?: User; preferences?: ProfilePreferences; error?: string };
+        if (!response.ok || !result.user || !result.preferences) throw new Error(result.error ?? "Не удалось сохранить профиль.");
+        setUser(result.user);
+        setDashboard((current) => buildDashboard(current.workouts, result.preferences!, result.user!.fullName.split(" ")[0]));
+      }
+      setSettingsOpen(false);
+      toast.success("Профиль обновлён");
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "Не удалось сохранить профиль.");
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
   async function submitAuth(event: FormEvent<HTMLFormElement>, mode: "register" | "login") {
     event.preventDefault();
     setFormError("");
@@ -400,6 +557,11 @@ export function QuestFitApp() {
 
         window.localStorage.setItem(staticKeys.session, "true");
         setUser(nextUser);
+        setDashboard((current) => {
+          const next = buildDashboard(current.workouts, current.preferences, nextUser.fullName.split(" ")[0]);
+          window.localStorage.setItem(staticKeys.dashboard, JSON.stringify(next));
+          return next;
+        });
         setAuthOpen(false);
         toast.success(mode === "register" ? "Добро пожаловать в QuestFit" : "С возвращением", {
           description: `${nextUser.fullName}, прогресс сохраняется в этом браузере.`,
@@ -545,6 +707,12 @@ export function QuestFitApp() {
           </div>
         </section>
 
+        <ProgressSection
+          dashboard={dashboard}
+          onCreateWorkout={createWorkoutEntry}
+          onDeleteWorkout={deleteWorkoutEntry}
+        />
+
         <section className="qf-lower-grid">
           <article className="qf-panel qf-week-panel">
             <div className="qf-panel-head"><div><span className="qf-kicker">RHYTHM</span><h2>Ритм недели</h2></div><span className="qf-delta">+18%</span></div>
@@ -606,8 +774,31 @@ export function QuestFitApp() {
         <DialogContent className="qf-info-dialog">
           <DialogHeader><DialogTitle>Профиль игрока</DialogTitle><DialogDescription>Ваши данные и текущая игровая форма.</DialogDescription></DialogHeader>
           <div className="qf-profile-card"><span className="qf-profile-avatar"><UserRound aria-hidden="true" /></span><div><b>{user?.fullName}</b><p>{user?.email}</p><small>{user?.goal}</small></div></div>
-          <div className="qf-profile-stats"><span><b>24</b><small>уровень</small></span><span><b>{completed.length}</b><small>квеста сегодня</small></span><span><b>12</b><small>дней серии</small></span></div>
-          <Button className="qf-sheet-action" onClick={() => { setProfileOpen(false); navigateTo("#quests"); }}>Перейти к квестам</Button>
+          <div className="qf-profile-stats"><span><b>{dashboard.workouts.length}</b><small>тренировок</small></span><span><b>{dashboard.totals.minutes}</b><small>минут активности</small></span><span><b>{dashboard.totals.workoutXp}</b><small>XP за тренировки</small></span></div>
+          <div className="qf-profile-actions">
+            <Button className="qf-sheet-action" onClick={() => { setProfileOpen(false); setProfileError(""); setSettingsOpen(true); }}><Settings aria-hidden="true" /> Настроить профиль</Button>
+            <button onClick={() => { setProfileOpen(false); navigateTo("#progress"); }}>Открыть историю тренировок</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="qf-info-dialog qf-settings-dialog">
+          <DialogHeader><DialogTitle>Настройки профиля</DialogTitle><DialogDescription>Персонализируйте цель, город и недельный план.</DialogDescription></DialogHeader>
+          <form className="qf-workout-form" onSubmit={saveProfileSettings}>
+            <div className="qf-field"><Label htmlFor="profile-name">Имя</Label><Input id="profile-name" name="fullName" defaultValue={user?.fullName ?? ""} minLength={2} maxLength={60} required /></div>
+            <div className="qf-field"><Label htmlFor="profile-goal">Фитнес-цель</Label><Input id="profile-goal" name="goal" defaultValue={user?.goal ?? ""} minLength={2} maxLength={120} required /></div>
+            <div className="qf-form-pair">
+              <div className="qf-field"><Label htmlFor="profile-city">Город</Label><Input id="profile-city" name="city" defaultValue={dashboard.preferences.city} minLength={2} maxLength={80} required /></div>
+              <div className="qf-field"><Label htmlFor="profile-weekly-goal">План, мин/нед.</Label><Input id="profile-weekly-goal" name="weeklyGoalMinutes" type="number" min={60} max={2400} step={30} defaultValue={dashboard.preferences.weeklyGoalMinutes} required /></div>
+            </div>
+            <label className="qf-checkbox-row">
+              <input name="notificationsEnabled" type="checkbox" defaultChecked={dashboard.preferences.notificationsEnabled} />
+              <span><b>Уведомления о серии</b><small>Напоминать о квестах и командных стартах.</small></span>
+            </label>
+            {profileError && <p className="qf-auth-error" role="alert">{profileError}</p>}
+            <Button type="submit" className="qf-sheet-action" disabled={profileSaving}>{profileSaving ? "Сохраняем…" : "Сохранить настройки"}</Button>
+          </form>
         </DialogContent>
       </Dialog>
 

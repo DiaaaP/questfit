@@ -1,29 +1,18 @@
 import { getActivity, setEventRegistration, setQuestCompletion } from "@/backend/activity/repository";
-import { getSessionUser } from "@/backend/auth/service";
-
-async function requireUser(request: Request) {
-  const user = await getSessionUser(request);
-  if (!user) throw new Response(JSON.stringify({ error: "Войдите, чтобы сохранить прогресс." }), {
-    status: 401,
-    headers: { "Content-Type": "application/json" },
-  });
-  return user;
-}
+import { apiError, requireSessionUser } from "@/backend/auth/request";
 
 export async function GET(request: Request) {
   try {
-    const user = await requireUser(request);
+    const user = await requireSessionUser(request);
     return Response.json(await getActivity(user.id));
   } catch (error) {
-    if (error instanceof Response) return error;
-    console.error("QuestFit activity lookup failed", error);
-    return Response.json({ error: "Не удалось загрузить прогресс." }, { status: 500 });
+    return apiError(error, "Не удалось загрузить прогресс.");
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser(request);
+    const user = await requireSessionUser(request);
     const input = (await request.json()) as Record<string, unknown>;
 
     if (input.action === "quest") {
@@ -40,8 +29,6 @@ export async function POST(request: Request) {
 
     return Response.json(await getActivity(user.id));
   } catch (error) {
-    if (error instanceof Response) return error;
-    console.error("QuestFit activity update failed", error);
-    return Response.json({ error: "Не удалось сохранить действие." }, { status: 500 });
+    return apiError(error, "Не удалось сохранить действие.");
   }
 }

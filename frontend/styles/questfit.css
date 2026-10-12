@@ -136,6 +136,64 @@
 .qf-quest-card.done > button { border-color: var(--qf-ember); background: var(--qf-ember); }
 .qf-quest-card > button svg { width: 14px; stroke-width: 3; }
 
+.qf-progress-section { padding-top: 34px; }
+.qf-progress-head { align-items: end; }
+.qf-add-workout { min-height: 42px !important; border-radius: 12px !important; background: linear-gradient(180deg, #ffad78, #e57e4e) !important; color: #1a0d07 !important; font-weight: 900 !important; }
+.qf-add-workout svg { width: 17px; }
+.qf-metric-grid { margin: 16px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.qf-metric-grid article { min-width: 0; padding: 17px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--qf-line); border-radius: 16px; background: rgba(18,20,26,.88); }
+.qf-metric-grid article > svg { width: 21px; flex: 0 0 auto; color: var(--qf-ember); }
+.qf-metric-grid article span { min-width: 0; display: grid; gap: 4px; }
+.qf-metric-grid article small { color: var(--qf-muted); font-size: .62rem; }
+.qf-metric-grid article b { overflow: hidden; font-size: .83rem; text-overflow: ellipsis; white-space: nowrap; }
+.qf-progress-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .75fr); gap: 15px; align-items: start; }
+.qf-history-panel { min-height: 100%; }
+.qf-history-count { padding: 6px 9px; border-radius: 8px; background: rgba(255,255,255,.05); color: var(--qf-muted); font-size: .63rem; font-weight: 800; }
+.qf-goal-card { margin: 20px 0 14px; padding: 14px; border: 1px solid rgba(255,156,98,.14); border-radius: 13px; background: rgba(255,156,98,.055); }
+.qf-goal-card > div { margin-bottom: 10px; display: flex; justify-content: space-between; gap: 14px; color: var(--qf-muted); font-size: .7rem; }
+.qf-goal-card b { color: var(--qf-copy); }
+.qf-workout-list { display: grid; gap: 8px; content-visibility: auto; }
+.qf-workout-row { min-width: 0; padding: 11px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 11px; border: 1px solid var(--qf-line); border-radius: 13px; background: rgba(255,255,255,.02); }
+.qf-workout-type { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 11px; color: #89c4ff; background: rgba(91,165,233,.12); }
+.qf-workout-type.strength { color: #ffad78; background: rgba(255,156,98,.12); }
+.qf-workout-type.walk { color: #79d78a; background: rgba(91,205,118,.12); }
+.qf-workout-type.cycling { color: #c8acff; background: rgba(177,140,255,.12); }
+.qf-workout-type.mobility { color: #f1cf68; background: rgba(241,207,104,.1); }
+.qf-workout-type svg { width: 17px; }
+.qf-workout-row > div { min-width: 0; display: grid; gap: 3px; }
+.qf-workout-row > div b { overflow: hidden; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+.qf-workout-row small { color: var(--qf-muted); font-size: .61rem; }
+.qf-workout-row > p { margin: 0; display: grid; gap: 3px; text-align: right; }
+.qf-workout-row > p b { font-size: .7rem; }
+.qf-workout-row > button { width: 31px; height: 31px; display: grid; place-items: center; border: 0; border-radius: 9px; background: transparent; color: #626771; }
+.qf-workout-row > button:hover { background: rgba(242,108,95,.09); color: #ff8f85; }
+.qf-workout-row > button svg { width: 15px; }
+.qf-empty-workouts { min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #616671; text-align: center; }
+.qf-empty-workouts svg { width: 25px; }
+.qf-empty-workouts p { margin: 0; font-size: .77rem; line-height: 1.5; }
+.qf-empty-workouts span { color: var(--qf-muted); }
+.qf-progress-side { display: grid; gap: 15px; }
+.qf-leaderboard-panel, .qf-achievement-panel { min-height: 0; }
+.qf-leaderboard-panel .qf-panel-head > svg, .qf-achievement-panel .qf-panel-head > svg { width: 23px; color: #f1cf68; }
+.qf-leaderboard-list { margin-top: 17px; display: grid; gap: 7px; }
+.qf-leaderboard-list > div { padding: 9px; display: grid; grid-template-columns: 22px 32px 1fr; align-items: center; gap: 8px; border-radius: 11px; }
+.qf-leaderboard-list > div.current { background: rgba(255,156,98,.09); outline: 1px solid rgba(255,156,98,.2); }
+.qf-leaderboard-list > div > strong { color: #737883; font-size: .68rem; text-align: center; }
+.qf-leaderboard-list > div > span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: #292d36; color: var(--qf-ember); font-size: .63rem; font-weight: 900; }
+.qf-leaderboard-list p { margin: 0; display: grid; gap: 2px; }
+.qf-leaderboard-list b { font-size: .7rem; }
+.qf-leaderboard-list small { color: var(--qf-muted); font-size: .59rem; }
+.qf-achievement-list { margin-top: 17px; display: grid; gap: 8px; }
+.qf-achievement-list > div { padding: 10px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; border: 1px solid var(--qf-line); border-radius: 12px; opacity: .55; }
+.qf-achievement-list > div.unlocked { border-color: rgba(121,215,138,.17); background: rgba(121,215,138,.04); opacity: 1; }
+.qf-achievement-list > div > span { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: #252832; color: #777c87; }
+.qf-achievement-list > div.unlocked > span { background: rgba(121,215,138,.12); color: #79d78a; }
+.qf-achievement-list svg { width: 15px; }
+.qf-achievement-list p { margin: 0; display: grid; gap: 2px; }
+.qf-achievement-list b { font-size: .68rem; }
+.qf-achievement-list small { color: var(--qf-muted); font-size: .57rem; line-height: 1.3; }
+.qf-achievement-list strong { color: var(--qf-ember); font-size: .54rem; }
+
 .qf-lower-grid { padding-top: 28px; display: grid; grid-template-columns: 1.1fr .9fr 1fr; gap: 15px; }
 .qf-panel { min-height: 300px; padding: 23px; border-radius: 20px; }
 .qf-delta { padding: 5px 8px; border-radius: 8px; background: rgba(121,215,138,.1); color: #79d78a; font-size: .68rem; font-weight: 900; }
@@ -223,6 +281,10 @@
 .qf-profile-stats span { padding: 14px 8px; display: grid; gap: 4px; border: 1px solid var(--qf-line); border-radius: 13px; text-align: center; }
 .qf-profile-stats b { font: 900 1.25rem/1 "Arial Black", Impact, sans-serif; }
 .qf-profile-stats small { color: var(--qf-muted); font-size: .6rem; }
+.qf-profile-actions { display: grid; gap: 7px; }
+.qf-profile-actions .qf-sheet-action svg { width: 16px; }
+.qf-profile-actions > button:not(.qf-sheet-action) { min-height: 38px; border: 0; background: transparent; color: var(--qf-muted); font-size: .69rem; }
+.qf-profile-actions > button:not(.qf-sheet-action):hover { color: var(--qf-copy); }
 .qf-season-progress { padding: 16px; border: 1px solid var(--qf-line); border-radius: 14px; background: rgba(255,255,255,.025); }
 .qf-season-progress > div { margin-bottom: 10px; display: flex; justify-content: space-between; gap: 15px; color: var(--qf-muted); font-size: .69rem; }
 .qf-season-progress b { color: var(--qf-copy); }
@@ -284,12 +346,28 @@
 .qf-field input { height: 45px; border-color: #30333d; border-radius: 11px; background: #0c0e13 !important; color: white; font-size: .85rem; box-shadow: none; }
 .qf-field input::placeholder { color: #525761; }
 .qf-field input:focus-visible { border-color: var(--qf-ember); box-shadow: 0 0 0 3px rgba(255,156,98,.12); }
+.qf-workout-dialog, .qf-settings-dialog { max-width: 560px !important; }
+.qf-workout-form { display: grid; gap: 14px; }
+.qf-form-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.qf-form-triple { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.qf-field select, .qf-field textarea { width: 100%; border: 1px solid #30333d; border-radius: 11px; background: #0c0e13; color: white; font-size: .85rem; outline: none; }
+.qf-field select { height: 45px; padding: 0 12px; }
+.qf-field textarea { min-height: 80px; padding: 12px; resize: vertical; }
+.qf-field select:focus, .qf-field textarea:focus { border-color: var(--qf-ember); box-shadow: 0 0 0 3px rgba(255,156,98,.12); }
+.qf-checkbox-row { padding: 13px; display: flex; align-items: center; gap: 11px; border: 1px solid var(--qf-line); border-radius: 12px; background: rgba(255,255,255,.02); cursor: pointer; }
+.qf-checkbox-row input { width: 17px; height: 17px; accent-color: var(--qf-ember); }
+.qf-checkbox-row span { display: grid; gap: 3px; }
+.qf-checkbox-row b { font-size: .72rem; }
+.qf-checkbox-row small { color: var(--qf-muted); font-size: .62rem; }
 .qf-auth-error { margin: -3px 0 0; padding: 10px 12px; border: 1px solid rgba(242,108,95,.2); border-radius: 10px; background: rgba(242,108,95,.08); color: #ff9c92; font-size: .72rem; }
 .qf-auth-submit { width: 100%; min-height: 46px !important; margin-top: 2px; }
 .qf-terms { margin: -2px 16px 0; color: #5f646e; font-size: .62rem; line-height: 1.45; text-align: center; }
 
 @media (max-width: 1180px) {
   .qf-quest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qf-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qf-progress-layout { grid-template-columns: 1fr; }
+  .qf-progress-side { grid-template-columns: 1fr 1fr; }
   .qf-lower-grid { grid-template-columns: 1fr 1fr; }
   .qf-arena-panel { grid-column: span 2; min-height: auto; }
   .qf-arena-meta { max-width: 500px; }
@@ -340,6 +418,11 @@
   .qf-completion small { display: none; }
   .qf-quest-grid { grid-template-columns: 1fr; }
   .qf-quest-card { min-height: 105px; }
+  .qf-progress-head { align-items: center; }
+  .qf-add-workout { padding: 0 12px !important; font-size: .7rem !important; }
+  .qf-progress-side { grid-template-columns: 1fr; }
+  .qf-workout-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .qf-workout-row > p { display: none; }
   .qf-lower-grid { grid-template-columns: 1fr; }
   .qf-arena-panel { grid-column: auto; }
   .qf-arena-actions { grid-template-columns: .9fr 1.1fr; }
@@ -348,11 +431,13 @@
   .qf-week-panel { min-height: 300px; }
   .qf-footer { padding: 28px 2px 0; }
   .qf-footer p { display: none; }
-  .qf-mobile-nav { position: fixed; z-index: 30; left: 50%; bottom: 10px; width: min(calc(100% - 20px), 430px); min-height: 66px; padding: 7px 5px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(16,18,24,.94); backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,.45); transform: translateX(-50%); }
+  .qf-mobile-nav { position: fixed; z-index: 30; left: 50%; bottom: 10px; width: min(calc(100% - 20px), 430px); min-height: 66px; padding: 7px 5px; display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(16,18,24,.94); backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,.45); transform: translateX(-50%); }
   .qf-mobile-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #737883; font-size: .55rem; font-weight: 800; text-decoration: none; }
   .qf-mobile-nav a.active { color: var(--qf-ember); }
   .qf-mobile-nav svg { width: 19px; }
   .qf-auth-dialog { max-width: calc(100% - 20px) !important; padding: 23px 19px !important; }
+  .qf-info-dialog { max-width: calc(100% - 20px) !important; padding: 23px 19px !important; }
+  .qf-form-pair, .qf-form-triple { grid-template-columns: 1fr; }
   .qf-arena-brief { grid-template-columns: auto 1fr; }
   .qf-arena-brief strong { grid-column: 2; }
 }
