@@ -51,13 +51,16 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
+import { AdminSection } from "@/frontend/components/admin-section";
 import { ProgressSection } from "@/frontend/components/progress-section";
+import { TeamManager } from "@/frontend/components/team-manager";
 import {
   buildDashboard,
   calculateWorkoutXp,
   type DashboardData,
   type NewWorkoutInput,
   type ProfilePreferences,
+  type TeamData,
   type WorkoutEntry,
 } from "@/shared/questfit";
 
@@ -107,6 +110,7 @@ const navItems = [
   { href: "#progress", label: "Прогресс", icon: Activity },
   { href: "#squad", label: "Команда", icon: Users },
   { href: "#arena", label: "Арена", icon: Trophy },
+  { href: "#admin", label: "Админ", icon: ShieldCheck },
 ];
 
 const week = [
@@ -139,11 +143,12 @@ export function QuestFitApp() {
   const [seasonOpen, setSeasonOpen] = useState(false);
   const [arenaOpen, setArenaOpen] = useState(false);
   const [squadOpen, setSquadOpen] = useState(false);
-  const [squadBoost, setSquadBoost] = useState(0);
   const [proEnabled, setProEnabled] = useState(false);
   const [eventJoined, setEventJoined] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<DashboardData>(() => buildDashboard());
+  const [teamData, setTeamData] = useState<TeamData | null>(null);
+  const staticMode = isGitHubPages();
 
   /* eslint-disable react-hooks/set-state-in-effect -- GitHub Pages demo state is hydrated from browser storage after mount. */
   useEffect(() => {
@@ -724,13 +729,13 @@ export function QuestFitApp() {
 
           <article className="qf-panel qf-raid-panel" id="squad">
             <div className="qf-raid-top"><span className="qf-kicker">SQUAD RAID</span><span className="qf-timer"><Clock3 aria-hidden="true" /> 2д 14ч</span></div>
-            <div className="qf-boss"><span><Swords aria-hidden="true" /></span><div><small>РАЙОННЫЙ БОСС</small><h2>Железный колосс</h2><p>{78 + squadBoost} / 100 км командой</p></div></div>
-            <Progress value={78 + squadBoost} className="qf-raid-progress" aria-label={`Прогресс командного рейда: ${78 + squadBoost}%`} />
+            <div className="qf-boss"><span><Swords aria-hidden="true" /></span><div><small>{teamData?.name?.toUpperCase() ?? "РАЙОННЫЙ БОСС"}</small><h2>{teamData ? "Командный рейд" : "Железный колосс"}</h2><p>{teamData ? `${teamData.totalKm.toLocaleString("ru-RU")} / ${teamData.goalKm}` : "78 / 100"} км командой</p></div></div>
+            <Progress value={teamData ? Math.min(100, (teamData.totalKm / teamData.goalKm) * 100) : 78} className="qf-raid-progress" aria-label="Прогресс командного рейда" />
             <div className="qf-squad-row">
-              <div className="qf-avatar-stack"><span>RV</span><span>KM</span><span>AK</span><span>+3</span></div>
-              <b>До награды {22 - squadBoost} км</b>
+              <div className="qf-avatar-stack">{teamData ? teamData.members.slice(0, 3).map((member) => <span key={member.userId}>{member.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span>) : <><span>RV</span><span>KM</span><span>AK</span><span>+3</span></>}</div>
+              <b>До награды {teamData ? Math.max(0, Math.round((teamData.goalKm - teamData.totalKm) * 10) / 10) : 22} км</b>
             </div>
-            <button className="qf-panel-action" onClick={() => setSquadOpen(true)}><Users aria-hidden="true" /> Открыть команду</button>
+            <button className="qf-panel-action" onClick={() => setSquadOpen(true)}><Users aria-hidden="true" /> {teamData ? "Управлять командой" : "Открыть команду"}</button>
           </article>
 
           <article className="qf-panel qf-arena-panel" id="arena">
@@ -745,6 +750,8 @@ export function QuestFitApp() {
             </div>
           </article>
         </section>
+
+        <AdminSection user={user} staticMode={staticMode} />
 
         <footer className="qf-footer"><span>QUESTFIT / SEASON 04</span><p>Твоя сила — твой статус.</p></footer>
       </main>
@@ -822,18 +829,7 @@ export function QuestFitApp() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={squadOpen} onOpenChange={setSquadOpen}>
-        <DialogContent className="qf-info-dialog qf-squad-dialog">
-          <DialogHeader><DialogTitle>Отряд «Северный ветер»</DialogTitle><DialogDescription>Шесть игроков вместе проходят районный рейд.</DialogDescription></DialogHeader>
-          <div className="qf-squad-boss-card"><span><Swords aria-hidden="true" /></span><div><small>ОБЩИЙ ПРОГРЕСС</small><b>{78 + squadBoost} / 100 км</b><Progress value={78 + squadBoost} className="qf-raid-progress" /></div></div>
-          <div className="qf-member-list">
-            <div><span>RV</span><p><b>Роман</b><small>18,4 км · лидер</small></p><strong>+640 XP</strong></div>
-            <div><span>KM</span><p><b>Кира</b><small>15,2 км · темп</small></p><strong>+520 XP</strong></div>
-            <div><span>AK</span><p><b>Алекс</b><small>12,8 км · поддержка</small></p><strong>+440 XP</strong></div>
-          </div>
-          <Button className="qf-sheet-action" disabled={squadBoost > 0} onClick={() => { setSquadBoost(2); toast.success("Вклад команды учтён", { description: "+2 км к рейду и +80 XP каждому участнику." }); }}>{squadBoost > 0 ? "Сегодняшний вклад учтён" : "Добавить командный бонус · +2 км"}</Button>
-        </DialogContent>
-      </Dialog>
+      <TeamManager open={squadOpen} onOpenChange={setSquadOpen} user={user} staticMode={staticMode} onTeamChange={setTeamData} />
 
       <Dialog open={seasonOpen} onOpenChange={setSeasonOpen}>
         <DialogContent className="qf-info-dialog">

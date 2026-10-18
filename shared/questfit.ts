@@ -49,6 +49,62 @@ export type DashboardData = {
 
 export type NewWorkoutInput = Omit<WorkoutEntry, "id" | "xp">;
 
+export type TeamMember = {
+  userId: number;
+  name: string;
+  role: "leader" | "member";
+  contributionKm: number;
+  xp: number;
+  joinedAt: number;
+};
+
+export type TeamData = {
+  id: number;
+  name: string;
+  code: string;
+  goalKm: number;
+  totalKm: number;
+  leaderId: number;
+  members: TeamMember[];
+};
+
+export type AdminUser = {
+  id: number;
+  fullName: string;
+  email: string;
+  goal: string;
+  createdAt: number;
+  workoutCount: number;
+  teamName: string | null;
+};
+
+export type AdminQuest = {
+  id: number;
+  title: string;
+  detail: string;
+  xp: number;
+  active: boolean;
+};
+
+export type AdminEvent = {
+  id: number;
+  slug: string;
+  title: string;
+  location: string;
+  distanceKm: number;
+  startAt: number;
+  rewardXp: number;
+  capacity: number;
+  active: boolean;
+  registrations: number;
+};
+
+export type AdminData = {
+  users: AdminUser[];
+  quests: AdminQuest[];
+  events: AdminEvent[];
+};
+
 export const workoutTypeLabels: Record<WorkoutType, string> = {
   strength: "Силовая",
   run: "Бег",
