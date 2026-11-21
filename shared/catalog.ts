@@ -37,8 +37,10 @@ export function catalogQuests(entries: AdminQuest[]): Quest[] {
   ];
 }
 
-export function catalogEvents(entries: ArenaEvent[]) {
+export function catalogEvents(entries: ArenaEvent[], registered: readonly string[] = [], includeStarter = true) {
   const overrides = new Set(entries.map(({ slug }) => slug));
-  return [...starterEvents.filter(({ slug }) => !overrides.has(slug)), ...entries.filter(({ active }) => active)]
+  const defaults = includeStarter ? starterEvents.filter(({ slug }) => !overrides.has(slug)) : [];
+  const visible = entries.filter(({ slug, active }) => active || registered.includes(slug));
+  return [...defaults, ...visible]
     .sort((a, b) => a.startAt - b.startAt);
 }

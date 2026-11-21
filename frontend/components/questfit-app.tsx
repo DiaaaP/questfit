@@ -79,6 +79,7 @@ export function QuestFitApp() {
   const hash = useSyncExternalStore(subscribeHash, windowHash, () => "overview");
   const { view, id, step, search } = readRoute(hash);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [now, setNow] = useState(Date.now);
   const fit = useQuestFit();
   const { user, ready, staticMode, dashboard, catalog, joined, completed, firstName } = fit;
   const team = useTeam(user, staticMode);
@@ -86,10 +87,11 @@ export function QuestFitApp() {
   const [title, description] = Object.hasOwn(pages, view) ? pages[view] : ["Страница не найдена", ""];
   const selectedQuest = catalog.quests.find((quest) => quest.id === Number(id));
   const event = catalog.events.find((item) => item.slug === id);
-  const featured = catalog.events.find((item) => item.startAt > Date.now());
-  const reminders = catalog.events.filter((item) => joined.includes(item.slug) && item.startAt > Date.now());
+  const nextStart = catalog.events.find((item) => item.startAt > now)?.startAt;
+  const featured = catalog.events.find((item) => item.active && item.startAt > now);
+  const reminders = catalog.events.filter((item) => joined.includes(item.slug) && item.startAt > now);
   const completedQuests = catalog.quests.filter((quest) => completed.includes(quest.id));
-  const xp = dashboard.totals.workoutXp + completedQuests.reduce((sum, quest) => sum + quest.xp, 0);
+  const xp = dashboard.totals.workoutXp + fit.questXp + fit.eventXp;
   const level = Math.floor(xp / 400) + 1;
   const week = weeklyMinutes(dashboard.workouts);
 
@@ -97,6 +99,17 @@ export function QuestFitApp() {
     document.title = `${title} · QuestFit`;
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [hash, title]);
+
+  useEffect(() => {
+    const update = () => setNow(Date.now());
+    const timer = nextStart === undefined ? undefined : window.setTimeout(update,
+      Math.min(Math.max(1, nextStart - Date.now()), 2_147_483_647));
+    window.addEventListener("focus", update);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", update);
+    };
+  }, [nextStart, now]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -145,7 +158,7 @@ export function QuestFitApp() {
     </div>
     {dashboard.workouts.length > 0 && <section className="portal-panel"><div className="portal-section-head"><h2>Последние тренировки</h2><Go to="workouts">Журнал</Go></div><WorkoutList workouts={dashboard.workouts.slice(0, 3)} /></section>}
   </>;
-  else if (view === "quests") content = <QuestCatalog quests={catalog.quests} completed={completed} />;
+  else if (view === "quests") content = <QuestCatalog quests={catalog.quests} completed={completed} todayXp={fit.todayQuestXp} />;
   else if (view === "quest") content = <QuestDetail quest={selectedQuest} done={Boolean(selectedQuest && completed.includes(selectedQuest.id))} pending={fit.questPending} onToggle={() => selectedQuest && void fit.saveQuest(selectedQuest, !completed.includes(selectedQuest.id))} />;
   else if (view === "workouts") content = <WorkoutJournal workouts={dashboard.workouts} />;
   else if (view === "workout") content = <WorkoutDetails workout={dashboard.workouts.find((entry) => entry.id === Number(id))} onDelete={fit.deleteWorkout} editable={Boolean(user)} />;
@@ -155,11 +168,13 @@ export function QuestFitApp() {
   else if (view === "progress") content = <ProgressSection dashboard={dashboard} />;
   else if (view === "achievements") content = <Achievements dashboard={dashboard} />;
   else if (view === "leaderboard") content = <Leaderboard dashboard={dashboard} demo={!user || staticMode} />;
-  else if (view === "arena") content = <ArenaCatalog events={catalog.events} joined={joined} />;
-  else if (view === "event") content = <EventDetail event={event} joined={joined.includes(id ?? "")} onRegister={(value) => event ? fit.registerForEvent(event, value) : Promise.reject(new Error("Событие недоступно."))} />;
+  else if (view === "arena") content = <ArenaCatalog events={catalog.events} joined={joined} finished={fit.finishedEvents} now={now} />;
+  else if (view === "event") content = <EventDetail key={id} event={event} joined={joined.includes(id ?? "")} finished={fit.finishedEvents.find((entry) => entry.slug === id)} now={now}
+    onCancel={() => event ? fit.registerForEvent(event, false) : Promise.reject(new Error("Событие недоступно."))}
+    onFinish={() => event ? fit.saveEventFinish(event) : Promise.reject(new Error("Событие недоступно."))} />;
   else if (view === "event/join") content = !user ? <NeedAccount description="Войдите, чтобы сохранить место на старте." /> : event && joined.includes(event.slug)
     ? <Empty title="Вы уже записаны" text="Детали участия доступны на странице события."><Go to={`event/${event.slug}`}>К событию</Go></Empty>
-    : <EventSignup event={event} user={user} onRegister={() => event ? fit.registerForEvent(event, true) : Promise.reject(new Error("Событие недоступно."))} />;
+    : <EventSignup event={event} user={user} now={now} onRegister={() => event ? fit.registerForEvent(event, true) : Promise.reject(new Error("Событие недоступно."))} />;
   else if (view === "team" || view.startsWith("team/")) content = <TeamManager user={user} staticMode={staticMode} view={id ?? "home"} {...team} />;
   else if (view === "admin" || view.startsWith("admin/")) content = <AdminSection view={id ?? "home"} user={user} staticMode={staticMode} onChange={fit.refreshCatalog} />;
   else if (view === "profile" || view === "goal" || view === "notifications") content = user

@@ -29,6 +29,13 @@
       "when": 1792328963993,
       "tag": "0003_windy_mikhail_rasputin",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1795287359688,
+      "tag": "0004_slim_mandrill",
+      "breakpoints": true
     }
   ]
 }

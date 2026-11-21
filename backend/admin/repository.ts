@@ -92,13 +92,17 @@ export async function createEvent(input: Omit<AdminEvent, "id" | "registrations"
 export async function updateEvent(input: Omit<AdminEvent, "registrations">) {
   await database()
     .prepare(
-      `UPDATE events SET slug = ?, title = ?, location = ?, distance_meters = ?,
+      `UPDATE events SET title = ?, location = ?, distance_meters = ?,
        start_at = ?, reward_xp = ?, capacity = ?, active = ? WHERE id = ?`,
     )
-    .bind(input.slug, input.title, input.location, Math.round(input.distanceKm * 1000), input.startAt, input.rewardXp, input.capacity, input.active ? 1 : 0, input.id)
+    .bind(input.title, input.location, Math.round(input.distanceKm * 1000), input.startAt, input.rewardXp, input.capacity, input.active ? 1 : 0, input.id)
     .run();
 }
 
 export async function deleteEvent(id: number) {
-  await database().prepare("DELETE FROM events WHERE id = ?").bind(id).run();
+  const db = database();
+  await db.batch([
+    db.prepare("DELETE FROM event_registrations WHERE event_slug = (SELECT slug FROM events WHERE id = ?)").bind(id),
+    db.prepare("DELETE FROM events WHERE id = ?").bind(id),
+  ]);
 }

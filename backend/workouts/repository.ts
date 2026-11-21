@@ -41,8 +41,7 @@ export async function listWorkouts(userId: number) {
               performed_at AS performedAt, notes
        FROM workout_logs
        WHERE user_id = ?
-       ORDER BY performed_at DESC
-       LIMIT 30`,
+       ORDER BY performed_at DESC, id DESC`,
     )
     .bind(userId)
     .all<WorkoutRow>();

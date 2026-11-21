@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Activity, Bike, CalendarDays, Dumbbell, Footprints, Medal, Timer, TrendingUp, Zap } from "lucide-react";
+import { Activity, Bike, Dumbbell, Footprints, Medal, Timer, TrendingUp, Zap } from "lucide-react";
 import { calculateWorkoutXp, workoutTypeLabels, type DashboardData, type NewWorkoutInput, type WorkoutEntry, type WorkoutType } from "@/shared/questfit";
 import { Action, Back, dateLabel, Empty, Field, FormError, formatNumber as num, Go, Meter, navigate, Stat } from "./portal-ui";
 

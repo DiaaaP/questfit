@@ -54,6 +54,28 @@ export const eventRegistrations = sqliteTable(
   (table) => [primaryKey({ columns: [table.userId, table.eventSlug] })],
 );
 
+export const dailyQuestCompletions = sqliteTable(
+  "daily_quest_completions",
+  {
+    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    questId: integer("quest_id").notNull(),
+    day: text("day").notNull(),
+    xp: integer("xp").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.day, table.questId] })],
+);
+
+export const eventFinishes = sqliteTable(
+  "event_finishes",
+  {
+    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    eventSlug: text("event_slug").notNull(),
+    xp: integer("xp").notNull(),
+    finishedAt: integer("finished_at").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.eventSlug] })],
+);
+
 export const workoutLogs = sqliteTable(
   "workout_logs",
   {

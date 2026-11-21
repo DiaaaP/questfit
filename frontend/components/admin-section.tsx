@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import { starterEvents } from "@/shared/catalog";
 import type { AdminData, AdminEvent, AdminQuest } from "@/shared/questfit";
 import { Action, api, Back, Empty, eventDateLabel, Field, FormError, Go, readLocal, Stat, type Athlete } from "./portal-ui";
-
-export const adminStorageKey = "qf_pages_admin";
+import { adminStorageKey, removeBrowserRegistration } from "./browser-activity";
 
 function localAdmin(user: Athlete): AdminData {
   const saved = readLocal<AdminData | null>(adminStorageKey, null);
@@ -43,6 +42,8 @@ export function AdminSection({ user, staticMode, view, onChange }: {
   const [data, setData] = useState<AdminData | null>(null);
   const [loadError, setLoadError] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
+  const [draftVersion, setDraftVersion] = useState(0);
+  const [defaultStart, setDefaultStart] = useState(() => inputDate(Date.now() + 604800000));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -65,9 +66,18 @@ export function AdminSection({ user, staticMode, view, onChange }: {
     setError(""); setPending(true);
     try {
       const next = staticMode ? applyLocal(data, action) : await api<AdminData>("/api/admin", "POST", action);
-      if (staticMode) localStorage.setItem(adminStorageKey, JSON.stringify(next));
+      if (staticMode) {
+        localStorage.setItem(adminStorageKey, JSON.stringify(next));
+        if (action.action === "deleteEvent") {
+          const removed = data.events.find(({ id }) => id === action.id);
+          if (removed) removeBrowserRegistration(removed.slug);
+        }
+      }
       setData(next);
       if (action.action.startsWith("delete")) setSelected(null);
+      if (action.action === "createQuest" || action.action === "createEvent") {
+        setDraftVersion((version) => version + 1);
+      }
       setConfirmDelete(false);
       toast.success("Изменения сохранены");
       onChange();
@@ -115,7 +125,10 @@ export function AdminSection({ user, staticMode, view, onChange }: {
     <Back to="admin">Администрирование</Back>
     <div className="portal-columns is-admin">
       <aside className="portal-panel">
-        <div className="portal-section-head"><h2>Каталог</h2><Action disabled={pending} onClick={() => { setSelected(null); setConfirmDelete(false); setError(""); }}>Новый</Action></div>
+        <div className="portal-section-head"><h2>Каталог</h2><Action disabled={pending} onClick={() => {
+          setSelected(null); setDraftVersion((version) => version + 1); setConfirmDelete(false); setError("");
+          setDefaultStart(inputDate(Date.now() + 604800000));
+        }}>Новый</Action></div>
         <div className="portal-rows">{(isQuest ? data.quests : data.events).map((entry) => <button
           type="button" key={entry.id} className={`portal-row ${selected === entry.id ? "is-me" : ""}`} disabled={pending}
           onClick={() => { setSelected(entry.id); setConfirmDelete(false); setError(""); }}>
@@ -126,7 +139,7 @@ export function AdminSection({ user, staticMode, view, onChange }: {
         {!(isQuest ? data.quests.length : data.events.length) && <p className="portal-muted">Создайте первую запись.</p>}
       </aside>
       <section className="portal-panel">
-        <form className="portal-form" key={item?.id ?? "new"} onSubmit={submit}>
+        <form className="portal-form" key={item?.id ?? `new-${draftVersion}`} onSubmit={submit}>
           <h2>{item ? "Редактирование" : isQuest ? "Новый квест" : "Новое соревнование"}</h2>
           <Field label="Название"><input name="title" minLength={2} maxLength={isQuest ? 80 : 100} defaultValue={item?.title} required /></Field>
           {isQuest ? <>
@@ -135,7 +148,7 @@ export function AdminSection({ user, staticMode, view, onChange }: {
           </> : <>
             <Field label="Место старта"><input name="location" minLength={2} maxLength={120} defaultValue={event?.location} required /></Field>
             <div className="portal-form-pair">
-              <Field label="Дата и время"><input name="startAt" type="datetime-local" defaultValue={inputDate(event?.startAt ?? Date.now() + 604800000)} required /></Field>
+              <Field label="Дата и время"><input name="startAt" type="datetime-local" defaultValue={event ? inputDate(event.startAt) : defaultStart} required /></Field>
               <Field label="Дистанция, км"><input name="distanceKm" type="number" min=".1" max={1000} step=".1" defaultValue={event?.distanceKm ?? 5} required /></Field>
             </div>
             <div className="portal-form-pair">
@@ -146,7 +159,7 @@ export function AdminSection({ user, staticMode, view, onChange }: {
           <label className="portal-check"><input name="active" type="checkbox" defaultChecked={item?.active ?? true} /> Показывать пользователям</label>
           <div className="portal-actions"><Action primary type="submit" disabled={pending}>{pending ? "Сохранение…" : "Сохранить"}</Action>
             {item && <Action className="is-danger" disabled={pending} onClick={() => setConfirmDelete(true)}>Удалить</Action>}</div>
-          {confirmDelete && item && <div className="portal-confirm"><p>Удалить «{item.title}» из каталога?</p><div className="portal-actions">
+          {confirmDelete && item && <div className="portal-confirm"><p>Удалить «{item.title}» из каталога? {event && "Все записи на этот старт будут сняты."}</p><div className="portal-actions">
             <Action className="is-danger" disabled={pending} onClick={() => void change({ action: isQuest ? "deleteQuest" : "deleteEvent", id: item.id })}>Подтвердить удаление</Action>
             <Action onClick={() => setConfirmDelete(false)}>Отмена</Action></div></div>}
           <FormError error={error} />

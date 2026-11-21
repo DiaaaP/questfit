@@ -1,11 +1,12 @@
 import { env } from "cloudflare:workers";
 import { catalogEvents, catalogQuests } from "@/shared/catalog";
 import type { AdminEvent, AdminQuest } from "@/shared/questfit";
+import { getRegisteredEventSlugs } from "@/backend/activity/repository";
 
-export async function getCatalog() {
+export async function getCatalog(userId?: number) {
   const db = env.DB;
   if (!db) throw new Error("QuestFit database is unavailable");
-  const [quests, events, counts] = await Promise.all([
+  const [quests, events, counts, registered] = await Promise.all([
     db.prepare("SELECT id, title, detail, xp, active FROM quest_definitions ORDER BY id").all<AdminQuest>(),
     db.prepare(
       `SELECT id, slug, title, location, distance_meters / 1000.0 AS distanceKm,
@@ -14,11 +15,12 @@ export async function getCatalog() {
     ).all<AdminEvent>(),
     db.prepare("SELECT event_slug AS slug, COUNT(*) AS total FROM event_registrations GROUP BY event_slug")
       .all<{ slug: string; total: number }>(),
+    userId === undefined ? [] : getRegisteredEventSlugs(userId),
   ]);
   const registrations = new Map(counts.results.map(({ slug, total }) => [slug, total]));
   return {
     quests: catalogQuests(quests.results),
-    events: catalogEvents(events.results).map((event) => ({
+    events: catalogEvents(events.results, registered).map((event) => ({
       ...event, active: Boolean(event.active), registrations: registrations.get(event.slug) ?? 0,
     })),
   };

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Activity, CalendarDays, Check, Dumbbell, Footprints, MapPin, Route, Swords, Target, Users, Zap } from "lucide-react";
 import type { ArenaEvent, Quest } from "@/shared/catalog";
+import type { EventFinish } from "@/shared/activity";
 import { Action, Back, Empty, eventDateLabel, FormError, formatNumber as num, Go, Meter, navigate, Stat, type Athlete } from "./portal-ui";
 
 const categories = {
@@ -25,12 +26,12 @@ export function QuestRows({ quests, completed }: { quests: Quest[]; completed: n
   })}</div>;
 }
 
-export function QuestCatalog({ quests, completed }: { quests: Quest[]; completed: number[] }) {
+export function QuestCatalog({ quests, completed, todayXp }: { quests: Quest[]; completed: number[]; todayXp: number }) {
   const [filter, setFilter] = useState<"all" | "active" | "done">("all");
   const shown = quests.filter(({ id }) => filter === "all" || completed.includes(id) === (filter === "done"));
   const count = quests.filter(({ id }) => completed.includes(id)).length;
   return <>
-    <div className="portal-stat-grid"><Stat label="Выполнено" value={`${count} / ${quests.length}`} /><Stat label="Получено за квесты" value={`${quests.filter(({id}) => completed.includes(id)).reduce((sum, quest) => sum + quest.xp, 0)} XP`} /></div>
+    <div className="portal-stat-grid"><Stat label="Выполнено сегодня" value={`${count} / ${quests.length}`} /><Stat label="XP за квесты сегодня" value={`${todayXp} XP`} /></div>
     <section className="portal-panel"><div className="portal-section-head"><h2>Доступные задания</h2><div className="portal-segments">
       {([["all", "Все"], ["active", "Активные"], ["done", "Выполненные"]] as const).map(([key, label]) =>
         <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}
@@ -57,10 +58,10 @@ export function QuestDetail({ quest, done, pending, onToggle }: { quest?: Quest;
   </>;
 }
 
-export function ArenaCatalog({ events, joined }: { events: ArenaEvent[]; joined: string[] }) {
+export function ArenaCatalog({ events, joined, finished, now }: { events: ArenaEvent[]; joined: string[]; finished: EventFinish[]; now: number }) {
   const [filter, setFilter] = useState("all");
-  const visible = events.filter((event) => filter !== "mine" || joined.includes(event.slug));
-  const featured = events.find((event) => event.startAt > Date.now()) ?? events[0];
+  const visible = events.filter((event) => filter === "mine" ? joined.includes(event.slug) : event.active);
+  const featured = events.find((event) => event.active && event.startAt > now);
   return <>
     {featured && <section className="portal-spotlight has-photo">
       <div className="portal-spotlight-copy"><span className="portal-chip"><CalendarDays size={16} aria-hidden="true" /> Ближайшие старты</span>
@@ -74,44 +75,78 @@ export function ArenaCatalog({ events, joined }: { events: ArenaEvent[]; joined:
       <div className="portal-rows">{visible.map((event) => <a className="portal-row" href={`#event/${event.slug}`} key={event.slug}>
         <span className="portal-icon activity-run"><CalendarDays size={20} aria-hidden="true" /></span>
         <span><strong>{event.title}</strong><small>{eventDateLabel(event.startAt)} · {event.location} · {num(event.distanceKm)} км</small></span>
-        <span className="portal-row-end">{joined.includes(event.slug) ? "Вы записаны" : event.startAt > Date.now() ? "Предстоит" : "Завершено"}</span>
+        <span className="portal-row-end">{finished.some((entry) => entry.slug === event.slug) ? "Финиш отмечен" : joined.includes(event.slug) ? "Вы записаны" : event.startAt > now ? "Предстоит" : "Старт прошёл"}</span>
       </a>)}</div>
       {!visible.length && <p className="portal-muted">{filter === "mine" ? "У вас пока нет записей на старты." : "Новые старты появятся здесь."}</p>}
     </section>
   </>;
 }
 
-export function EventDetail({ event, joined, onRegister }: { event?: ArenaEvent; joined: boolean; onRegister: (value: boolean) => Promise<void> }) {
+function registrationOpen(event: ArenaEvent, now: number) {
+  return event.active && event.startAt > now && event.registrations < event.capacity;
+}
+
+export function EventDetail({ event, joined, finished, now, onCancel, onFinish }: {
+  event?: ArenaEvent;
+  joined: boolean;
+  finished?: EventFinish;
+  now: number;
+  onCancel: () => Promise<void>;
+  onFinish: () => Promise<void>;
+}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [confirming, setConfirming] = useState(false);
+
+  async function run(action: () => Promise<void>, fallback: string) {
+    setPending(true);
+    setError("");
+    try {
+      await action();
+      setConfirming(false);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : fallback);
+    } finally {
+      setPending(false);
+    }
+  }
+
   if (!event) return <Empty title="Событие недоступно" text="Вернитесь в календарь, чтобы найти другой старт."><Go to="arena">Календарь</Go></Empty>;
-  const available = event.startAt > Date.now() && event.registrations < event.capacity;
+  const started = event.startAt <= now;
   return <>
     <Back to="arena">Календарь арены</Back>
     <section className="portal-spotlight has-photo">
       <div className="portal-spotlight-copy"><span className="portal-chip"><MapPin size={16} aria-hidden="true" /> {event.location}</span>
         <h2>{event.title}</h2><p>{eventDateLabel(event.startAt)} · время Алматы</p>
-        {joined ? <div className="portal-actions"><span className="portal-chip portal-success"><Check size={17} aria-hidden="true" /> Вы записаны</span>
-          <Action disabled={pending} onClick={async () => {
-            setPending(true); setError("");
-            try { await onRegister(false); }
-            catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось отменить запись."); }
-            finally { setPending(false); }
-          }}>Отменить запись</Action></div> : available ? <Go to={`event/${event.slug}/join`} primary>Записаться на старт</Go> : <span className="portal-chip">Запись закрыта</span>}
+        {finished ? <span className="portal-chip portal-success"><Check size={17} aria-hidden="true" /> Финиш отмечен · +{finished.xp} XP</span>
+          : joined ? <>
+            {confirming && <p>Подтвердите финиш, если вы прошли дистанцию.</p>}
+            <div className="portal-actions">
+              {confirming ? <>
+                <Action primary disabled={pending} onClick={() => void run(onFinish, "Не удалось отметить финиш.")}>Подтвердить финиш</Action>
+                <Action disabled={pending} onClick={() => { setConfirming(false); setError(""); }}>Назад</Action>
+              </> : <>
+                <span className="portal-chip portal-success"><Check size={17} aria-hidden="true" /> Вы записаны</span>
+                {started && <Action primary disabled={pending} onClick={() => { setConfirming(true); setError(""); }}>Отметить финиш</Action>}
+                <Action disabled={pending} onClick={() => void run(onCancel, "Не удалось отменить запись.")}>Отменить запись</Action>
+              </>}
+            </div>
+          </> : registrationOpen(event, now) ? <Go to={`event/${event.slug}/join`} primary>Записаться на старт</Go> : <span className="portal-chip">Запись закрыта</span>}
         <FormError error={error} />
       </div>
     </section>
-    <div className="portal-stat-grid"><Stat label="Дистанция" value={`${num(event.distanceKm)} км`} /><Stat label="Места" value={`${event.registrations} / ${event.capacity}`} /><Stat label="Награда за финиш" value={`+${event.rewardXp} XP`} /></div>
+    <div className="portal-stat-grid"><Stat label="Дистанция" value={`${num(event.distanceKm)} км`} /><Stat label="Места" value={`${event.registrations} / ${event.capacity}`} /><Stat label={finished ? "Получено за финиш" : "Награда за финиш"} value={`+${finished?.xp ?? event.rewardXp} XP`} /></div>
     <section className="portal-panel portal-side-info"><Route size={23} aria-hidden="true" /><h2>Старт и маршрут</h2>
       <p>{event.location} · {num(event.distanceKm)} км</p><Meter value={event.registrations / event.capacity * 100} label="Заполненность старта" />
     </section>
   </>;
 }
 
-export function EventSignup({ event, user, onRegister }: { event?: ArenaEvent; user: Athlete; onRegister: () => Promise<void> }) {
+export function EventSignup({ event, user, now, onRegister }: { event?: ArenaEvent; user: Athlete; now: number; onRegister: () => Promise<void> }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   if (!event) return <Empty title="Событие недоступно" text="Проверьте актуальные старты в календаре."><Go to="arena">Календарь</Go></Empty>;
+  if (!registrationOpen(event, now) && !pending) return <Empty title="Запись закрыта" text="Проверьте другие старты в календаре."><Go to="arena">Календарь</Go></Empty>;
   const slug = event.slug;
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -2,19 +2,18 @@
 
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import { catalogEvents, catalogQuests, dailyQuests, featuredEventSlug, starterEvents, type ArenaEvent, type Quest } from "@/shared/catalog";
-import { buildDashboard, calculateWorkoutXp, type AdminData, type DashboardData, type NewWorkoutInput, type ProfilePreferences, type WorkoutEntry } from "@/shared/questfit";
-import { adminStorageKey } from "./admin-section";
+import { questPeriod, summarizeActivity, type ActivitySnapshot } from "@/shared/activity";
+import { dailyQuests, starterEvents, type ArenaEvent, type Quest } from "@/shared/catalog";
+import { buildDashboard, calculateWorkoutXp, type DashboardData, type NewWorkoutInput, type ProfilePreferences, type WorkoutEntry } from "@/shared/questfit";
 import type { ProfileUpdate } from "./account-views";
+import { browserActivity, browserCatalog, finishBrowserEvent, updateBrowserQuest, updateBrowserRegistration } from "./browser-activity";
 import { api, navigate, readLocal, type Athlete } from "./portal-ui";
 
 type LocalAccount = { user: Athlete; passwordHash: string; salt?: string };
-type ActivityData = { completedQuestIds: number[]; registeredEventSlugs: string[]; registeredForEvent?: boolean };
 type Catalog = { quests: Quest[]; events: ArenaEvent[] };
 
 const keys = {
-  account: "qf_pages_account", session: "qf_pages_session", completed: "qf_pages_completed",
-  event: "qf_pages_event_joined", events: "qf_pages_events", dashboard: "qf_pages_dashboard",
+  account: "qf_pages_account", session: "qf_pages_session", dashboard: "qf_pages_dashboard",
 };
 
 function isStatic() {
@@ -22,16 +21,6 @@ function isStatic() {
     (window.location.hostname.endsWith("github.io") || document.documentElement.dataset.deployment === "github-pages");
 }
 function noSubscribe() { return () => {}; }
-function localEventSlugs() {
-  return readLocal<string[]>(keys.events, localStorage.getItem(keys.event) === "true" ? [featuredEventSlug] : []);
-}
-function localCatalog(): Catalog {
-  const saved = readLocal<AdminData | null>(adminStorageKey, null);
-  const joined = localEventSlugs();
-  return { quests: catalogQuests(saved?.quests ?? []), events: catalogEvents(saved?.events ?? []).map((event) => ({
-    ...event, registrations: event.registrations + Number(joined.includes(event.slug)),
-  })) };
-}
 function toHex(bytes: ArrayBuffer) {
   return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -49,8 +38,8 @@ export function useQuestFit() {
   const [accountError, setAccountError] = useState("");
   const [catalog, setCatalog] = useState<Catalog>({ quests: dailyQuests, events: starterEvents });
   const [catalogError, setCatalogError] = useState(false);
-  const [completed, setCompleted] = useState<number[]>([]);
-  const [joined, setJoined] = useState<string[]>([]);
+  const [questDay, setQuestDay] = useState(() => questPeriod().day);
+  const [activity, setActivity] = useState(() => summarizeActivity([], [], []));
   const [questPending, setQuestPending] = useState(false);
   const [dashboard, setDashboard] = useState<DashboardData>(() => buildDashboard());
   const [dataError, setDataError] = useState("");
@@ -60,48 +49,81 @@ export function useQuestFit() {
   const firstName = user?.fullName.split(" ")[0] ?? "Атлет";
 
   const refreshCatalog = useCallback(() => {
-    if (isStatic()) { setCatalog(localCatalog()); return; }
-    void api<Catalog>("/api/catalog").then((next) => { setCatalog(next); setCatalogError(false); }).catch(() => setCatalogError(true));
-  }, []);
+    if (isStatic()) {
+      setCatalog(browserCatalog(Boolean(userId)));
+      setActivity(browserActivity(Boolean(userId)));
+      return;
+    }
+    const owner = session.current;
+    void api<Catalog>("/api/catalog").then((next) => {
+      if (session.current === owner) { setCatalog(next); setCatalogError(false); }
+    }).catch(() => {
+      if (session.current === owner) setCatalogError(true);
+    });
+  }, [userId]);
 
   function hydrateLocal(current: Athlete) {
     setUser(current);
     const stored = readLocal<DashboardData | null>(keys.dashboard, null);
     setDashboard(buildDashboard(stored?.workouts ?? [], stored?.preferences, current.fullName.split(" ")[0]));
-    setCompleted(readLocal<number[]>(keys.completed, []));
-    setJoined(localEventSlugs());
+    setActivity(browserActivity(true));
     setDataReady(true);
   }
 
   useEffect(() => {
     let active = true;
     if (isStatic()) {
-      const account = readLocal<LocalAccount | null>(keys.account, null);
-      if (account && localStorage.getItem(keys.session) === "true") hydrateLocal(account.user);
-      setCatalog(localCatalog()); setDataReady(true); setReady(true);
-      return;
+      queueMicrotask(() => {
+        if (!active) return;
+        const account = readLocal<LocalAccount | null>(keys.account, null);
+        if (account && localStorage.getItem(keys.session) === "true") hydrateLocal(account.user);
+        setDataReady(true); setReady(true);
+      });
+    } else {
+      void api<{ user: Athlete | null }>("/api/auth/session")
+        .then(({ user: current }) => { if (active) { session.current = current?.id; setUser(current); } })
+        .catch((reason) => active && setAccountError(reason instanceof Error ? reason.message : "Сессия недоступна."))
+        .finally(() => active && setReady(true));
     }
-    void api<Catalog>("/api/catalog").then((next) => active && setCatalog(next)).catch(() => active && setCatalogError(true));
-    void api<{ user: Athlete | null }>("/api/auth/session")
-      .then(({ user: current }) => { if (active) { session.current = current?.id; setUser(current); } })
-      .catch((reason) => active && setAccountError(reason instanceof Error ? reason.message : "Сессия недоступна."))
-      .finally(() => active && setReady(true));
     return () => { active = false; };
   }, []);
 
   useEffect(() => {
-    if (!userId || isStatic()) return;
+    if (!ready) return;
     let active = true;
-    Promise.all([api<ActivityData>("/api/activity"), api<DashboardData>("/api/dashboard")]).then(([activity, data]) => {
-      if (!active) return;
-      setCompleted(activity.completedQuestIds);
-      setJoined(activity.registeredEventSlugs ?? (activity.registeredForEvent ? [featuredEventSlug] : []));
-      setDashboard(data); setDataReady(true); setDataError("");
-    }).catch((reason) => {
-      if (active) { setDataReady(true); setDataError(reason instanceof Error ? reason.message : "Не удалось загрузить профиль."); }
-    });
+    queueMicrotask(() => { if (active) refreshCatalog(); });
     return () => { active = false; };
-  }, [userId]);
+  }, [ready, refreshCatalog]);
+
+  useEffect(() => {
+    let timeout: number;
+    function syncDay() {
+      window.clearTimeout(timeout);
+      const period = questPeriod();
+      setQuestDay(period.day);
+      timeout = window.setTimeout(syncDay, Math.max(100, period.endsAt - Date.now() + 50));
+    }
+    syncDay();
+    window.addEventListener("focus", syncDay);
+    return () => { window.clearTimeout(timeout); window.removeEventListener("focus", syncDay); };
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    let active = true;
+    if (!userId || isStatic()) {
+      queueMicrotask(() => { if (active) setActivity(browserActivity(Boolean(userId))); });
+    } else {
+      Promise.all([api<ActivitySnapshot>("/api/activity"), api<DashboardData>("/api/dashboard")]).then(([snapshot, data]) => {
+        if (!active) return;
+        setActivity(snapshot);
+        setDashboard(data); setDataReady(true); setDataError("");
+      }).catch((reason) => {
+        if (active) { setDataReady(true); setDataError(reason instanceof Error ? reason.message : "Не удалось загрузить профиль."); }
+      });
+    }
+    return () => { active = false; };
+  }, [userId, questDay, ready]);
 
   async function authenticate(mode: "login" | "register", values: FormData) {
     const fullName = String(values.get("fullName") ?? "").trim().replace(/\s+/g, " ");
@@ -129,7 +151,7 @@ export function useQuestFit() {
     } else {
       const result = await api<{ user: Athlete }>(`/api/auth/${mode}`, "POST", { fullName, email, password, goal });
       if (session.current !== result.user.id) {
-        setDataReady(false); setDataError(""); setCompleted([]); setJoined([]);
+        setDataReady(false); setDataError(""); setActivity(summarizeActivity([], [], []));
         setDashboard(buildDashboard([], undefined, result.user.fullName.split(" ")[0]));
       }
       session.current = result.user.id;
@@ -144,7 +166,7 @@ export function useQuestFit() {
       if (isStatic()) localStorage.removeItem(keys.session);
       else await api("/api/auth/logout", "POST");
       session.current = undefined;
-      setUser(null); setCompleted([]); setJoined([]); setDashboard(buildDashboard()); setDataError("");
+      setUser(null); setActivity(browserActivity(false)); setDashboard(buildDashboard()); setDataError("");
       navigate("login"); toast.success("Вы вышли из аккаунта");
     } catch (reason) { toast.error(reason instanceof Error ? reason.message : "Не удалось завершить сеанс."); }
   }
@@ -153,15 +175,15 @@ export function useQuestFit() {
     if (questPending) return false;
     setQuestPending(true);
     try {
-      const next = value ? [...new Set([...completed, quest.id])] : completed.filter((qid) => qid !== quest.id);
       if (!user || isStatic()) {
-        if (user) localStorage.setItem(keys.completed, JSON.stringify(next));
-        setCompleted(next);
+        setActivity(updateBrowserQuest(Boolean(user), quest.id, value ? quest.xp : null));
       } else {
-        const saved = await api<ActivityData>("/api/activity", "POST", { action: "quest", questId: quest.id, completed: value });
-        if (session.current === user.id) setCompleted(saved.completedQuestIds);
+        const saved = await api<ActivitySnapshot>("/api/activity", "POST", { action: "quest", questId: quest.id, completed: value });
+        if (session.current === user.id) setActivity(saved);
       }
-      toast.success(value ? `Квест выполнен · +${quest.xp} XP` : "Отметка снята");
+      toast.success(value ? `Квест выполнен · +${quest.xp} XP` : "Отметка снята", {
+        description: user ? undefined : "Гостевой прогресс сохраняется в этом браузере.",
+      });
       return true;
     } catch (reason) {
       toast.error(reason instanceof Error ? reason.message : "Не удалось сохранить квест.");
@@ -174,8 +196,10 @@ export function useQuestFit() {
     const id = Number((input as { questId?: unknown })?.questId);
     const quest = catalog.quests.find((entry) => entry.id === id);
     if (!quest) throw new Error("Неизвестный квест.");
-    if (!completed.includes(id) && !await saveQuest(quest, true)) throw new Error("Не удалось выполнить квест.");
-    return { questId: id, title: quest.title, status: "completed", xp: quest.xp, saved: Boolean(user) };
+    const completedToday = activity.questDay === questPeriod().day && activity.completedQuestIds.includes(id);
+    if (!completedToday && !await saveQuest(quest, true)) throw new Error("Не удалось выполнить квест.");
+    return { questId: id, title: quest.title, status: "completed", xp: quest.xp, saved: true,
+      scope: user && !isStatic() ? "account" : "browser" };
   });
 
   useEffect(() => {
@@ -204,20 +228,23 @@ export function useQuestFit() {
   async function registerForEvent(event: ArenaEvent, registered: boolean) {
     if (!user) throw new Error("Войдите, чтобы записаться на старт.");
     if (isStatic()) {
-      const current = localEventSlugs();
-      if (registered && (event.startAt <= Date.now() || (event.registrations >= event.capacity && !current.includes(event.slug)))) {
-        throw new Error("Запись закрыта или свободных мест больше нет.");
-      }
-      const next = registered ? [...new Set([...current, event.slug])] : current.filter((key) => key !== event.slug);
-      localStorage.setItem(keys.events, JSON.stringify(next));
-      localStorage.setItem(keys.event, String(next.includes(featuredEventSlug)));
-      setJoined(next);
+      setActivity(updateBrowserRegistration(event, registered));
     } else {
-      const next = await api<ActivityData>("/api/activity", "POST", { action: "event", eventSlug: event.slug, registered });
-      if (session.current === user.id) setJoined(next.registeredEventSlugs);
+      const next = await api<ActivitySnapshot>("/api/activity", "POST", { action: "event", eventSlug: event.slug, registered });
+      if (session.current === user.id) setActivity(next);
     }
     refreshCatalog();
     toast.success(registered ? "Участие подтверждено" : "Запись отменена");
+  }
+
+  async function saveEventFinish(event: ArenaEvent) {
+    if (!user) throw new Error("Войдите, чтобы отметить финиш.");
+    const local = isStatic();
+    const next = local ? finishBrowserEvent(event)
+      : await api<ActivitySnapshot>("/api/activity", "POST", { action: "finishEvent", eventSlug: event.slug });
+    if (local || session.current === user.id) setActivity(next);
+    const finish = next.finishedEvents.find(({ slug }) => slug === event.slug);
+    toast.success("Финиш отмечен", { description: finish ? `+${finish.xp} XP в прогрессе.` : undefined });
   }
 
   async function refreshDashboard(owner: number) {
@@ -276,5 +303,9 @@ export function useQuestFit() {
   }
 
   return { staticMode, user, ready, accountError, catalog, catalogError, dashboard, dataError, dataReady, firstName,
-    completed, joined, questPending, refreshCatalog, authenticate, logout, saveQuest, registerForEvent, saveWorkout, deleteWorkout, saveProfile };
+    completed: activity.questDay === questDay ? activity.completedQuestIds : [],
+    todayQuestXp: activity.questDay === questDay ? activity.todayQuestXp : 0,
+    joined: activity.registeredEventSlugs, questXp: activity.questXp, eventXp: activity.eventXp,
+    finishedEvents: activity.finishedEvents, questPending, refreshCatalog, authenticate, logout, saveQuest, registerForEvent,
+    saveEventFinish, saveWorkout, deleteWorkout, saveProfile };
 }
