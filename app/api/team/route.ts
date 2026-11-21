@@ -8,6 +8,7 @@ import {
   kickTeamMember,
   leaveTeam,
   TeamError,
+  transferTeamLeadership,
 } from "@/backend/team/repository";
 
 const actionSchema = z.discriminatedUnion("action", [
@@ -16,6 +17,7 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("contribute"), distanceKm: z.coerce.number().positive().max(300) }),
   z.object({ action: z.literal("leave") }),
   z.object({ action: z.literal("kick"), userId: z.coerce.number().int().positive() }),
+  z.object({ action: z.literal("transfer"), userId: z.coerce.number().int().positive() }),
 ]);
 
 export async function GET(request: Request) {
@@ -41,7 +43,9 @@ export async function POST(request: Request) {
           ? await contributeToTeam(user.id, input.distanceKm)
           : input.action === "kick"
             ? await kickTeamMember(user.id, input.userId)
-            : await leaveTeam(user.id);
+            : input.action === "transfer"
+              ? await transferTeamLeadership(user.id, input.userId)
+              : await leaveTeam(user.id);
     return Response.json({ team });
   } catch (error) {
     if (error instanceof TeamError) return Response.json({ error: error.message }, { status: error.status });

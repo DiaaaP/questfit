@@ -1,6 +1,5 @@
 import { env } from "cloudflare:workers";
-
-const EVENT_SLUG = "night-run-ural";
+import { featuredEventSlug, starterEvents } from "@/shared/catalog";
 
 function database() {
   if (!env.DB) throw new Error("QuestFit database is unavailable");
@@ -14,14 +13,16 @@ export async function getActivity(userId: number) {
       .bind(userId)
       .all<{ questId: number }>(),
     database()
-      .prepare("SELECT event_slug AS eventSlug FROM event_registrations WHERE user_id = ? AND event_slug = ? LIMIT 1")
-      .bind(userId, EVENT_SLUG)
-      .first<{ eventSlug: string }>(),
+      .prepare("SELECT event_slug AS eventSlug FROM event_registrations WHERE user_id = ?")
+      .bind(userId)
+      .all<{ eventSlug: string }>(),
   ]);
 
+  const registeredEventSlugs = eventResult.results.map(({ eventSlug }) => eventSlug);
   return {
     completedQuestIds: questsResult.results.map((row) => Number(row.questId)),
-    registeredForEvent: Boolean(eventResult),
+    registeredEventSlugs,
+    registeredForEvent: registeredEventSlugs.includes(featuredEventSlug),
   };
 }
 
@@ -39,16 +40,26 @@ export async function setQuestCompletion(userId: number, questId: number, comple
   }
 }
 
-export async function setEventRegistration(userId: number, registered: boolean) {
-  if (registered) {
-    await database()
-      .prepare("INSERT OR REPLACE INTO event_registrations (user_id, event_slug, registered_at) VALUES (?, ?, ?)")
-      .bind(userId, EVENT_SLUG, Date.now())
-      .run();
-  } else {
+export async function setEventRegistration(userId: number, registered: boolean, slug = featuredEventSlug) {
+  if (!registered) {
     await database()
       .prepare("DELETE FROM event_registrations WHERE user_id = ? AND event_slug = ?")
-      .bind(userId, EVENT_SLUG)
+      .bind(userId, slug)
       .run();
+    return true;
   }
+  const starter = starterEvents.find((event) => event.slug === slug);
+  const now = Date.now();
+  const result = await database().prepare(
+    `INSERT OR IGNORE INTO event_registrations (user_id, event_slug, registered_at)
+     SELECT ?, ?, ?
+     WHERE (SELECT COUNT(*) FROM event_registrations WHERE event_slug = ?) <
+       COALESCE(
+         (SELECT CASE WHEN active = 1 AND start_at > ? THEN capacity ELSE 0 END FROM events WHERE slug = ?),
+         ?
+       )`,
+  ).bind(userId, slug, now, slug, now, slug, starter && starter.startAt > now ? starter.capacity : 0).run();
+  if (result.meta.changes > 0) return true;
+  return Boolean(await database().prepare("SELECT 1 FROM event_registrations WHERE user_id = ? AND event_slug = ?")
+    .bind(userId, slug).first());
 }

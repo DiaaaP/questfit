@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ru"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary":"#002c72","error-container":"#93000a","on-surface-variant":"#dac1b6","on-secondary-fixed":"#001847","on-primary-fixed":"#331200","tertiary-container":"#23cf6e","on-tertiary-container":"#005226","surface-dim":"#111319","surface-container":"#1d1f26","surface-container-high":"#282a30","primary-container":"#ff9c62","surface-variant":"#33343b","tertiary-fixed-dim":"#40e17e","surface-container-low":"#191b22","surface-container-highest":"#33343b","secondary-fixed-dim":"#b2c5ff","on-primary-fixed-variant":"#773300","secondary-container":"#0154cc","on-surface":"#e2e2ea","on-secondary-container":"#c6d4ff","on-primary":"#542200","surface-container-lowest":"#0c0e14","on-secondary-fixed-variant":"#0040a0","outline":"#a28c81","surface-bright":"#373940","on-tertiary-fixed-variant":"#005226","on-tertiary-fixed":"#00210c","surface":"#111319","surface-tint":"#ffb68e","background":"#111319","on-background":"#e2e2ea","secondary-fixed":"#dae2ff","primary":"#ffc3a4","inverse-on-surface":"#2e3037","inverse-surface":"#e2e2ea","outline-variant":"#54433a","inverse-primary":"#964915","primary-fixed-dim":"#ffb68e","on-tertiary":"#003919","secondary":"#b2c5ff","primary-fixed":"#ffdbca","on-error":"#690005","tertiary-fixed":"#63ff97","on-error-container":"#ffdad6","on-primary-container":"#763200","tertiary":"#4eec87","error":"#ffb4ab"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.25rem","margin":"2rem","space-xs":"0.375rem","space-lg":"1.5rem","space-md":"1rem","space-sm":"0.625rem","space-xl":"2rem"},"fontFamily":{"title-level":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-hero":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"label-badge":["Plus Jakarta Sans"],"headline-hero-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"label-caps":["Plus Jakarta Sans"]},"fontSize":{"title-level":["48px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"800"}],"headline-sm":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-hero":["44px",{"lineHeight":"52px","letterSpacing":"-0.03em","fontWeight":"800"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-badge":["12px",{"lineHeight":"16px","fontWeight":"600"}],"headline-hero-mobile":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"14px","letterSpacing":"0.08em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface-container-lowest font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-low"><div class="w-9 h-9 rounded-xl bg-primary-container/20 flex items-center justify-center shadow-[0_0_20px_rgba(255,156,98,0.3)]"><span class="material-symbols-outlined text-primary-container text-[20px]">swords</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm uppercase tracking-wider text-primary">QUESTFIT</span><span class="font-label-caps text-label-caps uppercase text-primary-container tracking-widest">FITNESS RPG</span></div></div><div class="px-space-md pt-space-md"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant/70 px-space-xs mb-space-xs block">Навигация миссий</span></div><nav class="flex flex-col gap-1 px-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm rounded-xl shadow-[0_0_20px_rgba(255,156,98,0.25)]"><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="glavnaya" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span class="font-body-md text-body-md">Главная</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="kvesty" href="#"><span class="material-symbols-outlined text-[20px]">explore</span><span class="font-body-md text-body-md">Квесты</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="trenirovki" href="#"><span class="material-symbols-outlined text-[20px]">fitness_center</span><span class="font-body-md text-body-md">Тренировки</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="progress" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span class="font-body-md text-body-md">Прогресс</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="komanda" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-body-md text-body-md">Команда</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="arena" href="#"><span class="material-symbols-outlined text-[20px]">military_tech</span><span class="font-body-md text-body-md">Арена</span></a><a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="profil" href="#"><span class="material-symbols-outlined text-[20px]">account_box</span><span class="font-body-md text-body-md">Профиль</span></a></nav></div><div class="p-space-sm flex flex-col gap-space-xs"><div class="bg-surface-container p-space-sm rounded-xl shadow-[0_0_30px_rgba(255,156,98,0.06)]"><div class="flex items-center justify-between mb-space-xs"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Айдана К.</span><span class="font-label-badge text-label-badge text-on-surface-variant">Алматы · 8 уровень</span></div><span class="font-label-caps text-label-caps px-space-xs py-0.5 rounded-full bg-primary-container/20 text-primary-container font-bold">PRO</span></div><div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden mb-space-xs"><div class="bg-primary-container h-full rounded-full w-[72%]"></div></div><div class="flex justify-between items-center"><span class="font-label-caps text-label-caps text-on-surface-variant">Сезон 3: Пекло</span><span class="font-label-caps text-label-caps text-primary-container font-bold">3,600 / 5,000 XP</span></div></div><a class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="pomoshch-i-podderzhka" href="#"><span class="material-symbols-outlined text-[18px]">help</span><span class="font-body-sm text-body-sm">Помощь и поддержка</span></a></div></aside><div class="pl-60 min-h-screen bg-surface-container-lowest"><header class="fixed top-0 left-60 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 px-margin flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">calendar_today</span><span>Четверг, 24 Октября</span></div><div class="hidden md:flex items-center gap-space-xs bg-surface-container px-space-sm py-space-xs rounded-full shadow-[0_0_20px_rgba(255,156,98,0.1)]"><div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div><span class="font-label-badge text-label-badge text-on-surface">Рейдовый босс активен: Дракон Калорий</span></div></div><div class="flex items-center gap-space-md"><button class="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all relative"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right hidden sm:flex"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Айдана К.</span><span class="font-label-caps text-label-caps uppercase text-primary font-bold">Ур. 8 Рейнджер</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 px-margin pb-margin bg-surface-container-lowest"><div class="flex flex-col w-full">
+<!-- Interactive Navigation Subheader / Breadcrumb Trail -->
+<div class="flex items-center justify-between pb-space-lg">
+<div class="flex items-center gap-space-sm flex-wrap">
+<a class="inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all text-body-sm font-body-sm group" href="#">
+<span class="material-symbols-outlined text-[16px] transition-transform group-hover:-translate-x-1">arrow_back</span>
+<span>Вернуться к деталям события</span>
+</a>
+<span class="text-on-surface-variant/40">/</span>
+<span class="text-on-surface-variant font-label-caps uppercase text-label-caps tracking-widest">Арена</span>
+<span class="text-on-surface-variant/40">/</span>
+<span class="text-on-surface-variant font-label-caps uppercase text-label-caps tracking-widest">Календарь событий</span>
+<span class="text-on-surface-variant/40">/</span>
+<span class="text-primary-container font-label-caps uppercase text-label-caps tracking-widest font-bold">Night Run Урал</span>
+<span class="text-on-surface-variant/40">/</span>
+<span class="text-on-surface font-label-caps uppercase text-label-caps tracking-widest">Регистрация</span>
+</div>
+<div class="hidden xl:flex items-center gap-space-xs text-on-surface-variant font-label-badge text-label-badge bg-surface-container-low px-space-sm py-1 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>
+<span class="text-on-surface-variant">Сессия бронирования активна · Таймер:</span>
+<span class="text-primary font-bold" id="reservation-timer">14:59</span>
+</div>
+</div>
+<!-- Page Header Title & Deck -->
+<div class="flex flex-col gap-1 mb-space-xl">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-primary-container/20 text-primary-container font-label-caps text-label-caps uppercase font-bold tracking-wider">Шаг 2 из 2 · Подтверждение</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">· Финальная верификация данных</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Регистрация на старт: Night Run Урал</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">Проверьте параметры участия, условия зачёта в гильдейский рейд и подтвердите бронирование стартового слота.</p>
+</div>
+<!-- Main 2-Column Balanced Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-xl items-start">
+<!-- LEFT COLUMN (~65% / 8 cols) -->
+<div class="xl:col-span-8 flex flex-col gap-space-xl">
+<!-- 1. Event Hero Card with Visual Ambience -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container shadow-xl">
+<div class="bg-cover bg-center w-full h-56 relative" data-alt="Dark cinematic night running scene along an illuminated riverside promenade in Ural city, dramatic cold mist with neon coral and amber light accents, dynamic athlete silhouettes with reflective apparel, ultra high detail modern athletic editorial" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAufk6kwcxBU-JL3kNJ6HK1N-iGmau3khQ_b1OeCG8mSVyyj5MIO2-4_NqeuerKx18FXzArT397_NZXxi21Njgp25jTxQmVQMyzm_E-ZAKk84CJfLCORxzh3T6wqu0Q-fEMmzS5GcPwmcyNDs7RzqFjNy5MJjBZyx6IwzGwF3XeqFKP2lFrt50kjh0YVOmY990vBeJsfwND6Ij6DG9Zju-tNZtC0a3kXWhkAm0YPH42r9d_Rp8fSplxT2UyqnScdXi7ebTSpyn7VTE')">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/70 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container/90 via-surface-container/40 to-transparent"></div>
+<!-- Inner Hero Content -->
+<div class="absolute inset-0 p-space-lg flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="px-space-sm py-1 rounded-full bg-surface-container-highest/80 backdrop-blur text-primary font-label-caps text-label-caps uppercase tracking-wider font-bold">РЕГИОНАЛЬНЫЙ СТАРТ · СЕЗОН 04</span>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-tertiary-container/30 backdrop-blur text-tertiary font-label-badge text-label-badge font-bold">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span>Зачёт гильдии</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight">Night Run Урал · Ночной городской забег</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Линейный ночной спринт с неоновой навигацией по руслу городского пруда</span>
+</div>
+</div>
+</div>
+<!-- 4 Event Facts Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-space-md p-space-lg bg-surface-container">
+<div class="flex flex-col gap-1 p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-1.5 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">Дата и время</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">28 ноя 2024</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">19:00 (сбор с 18:15)</span>
+</div>
+<div class="flex flex-col gap-1 p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-1.5 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">Локация</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Уральск</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Набережная пруда</span>
+</div>
+<div class="flex flex-col gap-1 p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="material-symbols-outlined text-[18px]">straighten</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">Дистанция</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">5.0 км</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Асфальт, подсветка</span>
+</div>
+<div class="flex flex-col gap-1 p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-1.5 text-tertiary">
+<span class="material-symbols-outlined text-[18px]">military_tech</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">Награда</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">+1 200 XP</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Жетон Сезона 04</span>
+</div>
+</div>
+</div>
+<!-- 2. Block: Athlete Profile & Starting Cluster -->
+<div class="flex flex-col gap-space-lg p-space-lg rounded-xl bg-surface-container shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Профиль участника и кластер</h2>
+</div>
+<span class="font-label-badge text-label-badge text-on-surface-variant bg-surface-container-high px-space-sm py-1 rounded">Верифицирован</span>
+</div>
+<!-- Identity & Guild Strip -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,195,164,0.3)]">
+<span class="material-symbols-outlined text-on-primary text-[24px]">person</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Айдана К.</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-caps text-label-caps font-bold">PRO</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Уровень 8 · Рейнджер · г. Алматы</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md bg-surface-container p-space-sm rounded-lg">
+<div class="w-10 h-10 rounded-lg bg-secondary-container/40 flex items-center justify-center shrink-0 text-secondary">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Клан / Синдикат</span>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Северный ветер</span>
+<span class="font-body-sm text-body-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span>Бонус гильдии x1.5 XP активен</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Cluster Selector -->
+<div class="flex flex-col gap-space-sm">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold">Выбор стартового кластера (по целевому темпу)</label>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm" id="cluster-selector">
+<button class="flex flex-col gap-1 p-space-md rounded-lg text-left bg-surface-container-low hover:bg-surface-container-high transition-all" onclick="selectCluster(this, 'A')" type="button">
+<div class="flex items-center justify-between w-full">
+<span class="font-headline-sm text-headline-sm text-on-surface">Кластер A</span>
+<span class="w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center"></span>
+</div>
+<span class="font-body-md text-body-md text-primary font-bold">&lt; 5:00 мин/км</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Спортсмены и лидеры</span>
+</button>
+<button class="flex flex-col gap-1 p-space-md rounded-lg text-left bg-surface-container-high shadow-[0_0_20px_rgba(255,156,98,0.12)] transition-all" onclick="selectCluster(this, 'B')" type="button">
+<div class="flex items-center justify-between w-full">
+<span class="font-headline-sm text-headline-sm text-primary">Кластер B</span>
+<span class="w-4 h-4 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</span>
+</div>
+<span class="font-body-md text-body-md text-primary font-bold">5:00–6:00 мин/км</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Рекомендован под ваш темп (5:22)</span>
+</button>
+<button class="flex flex-col gap-1 p-space-md rounded-lg text-left bg-surface-container-low hover:bg-surface-container-high transition-all" onclick="selectCluster(this, 'C')" type="button">
+<div class="flex items-center justify-between w-full">
+<span class="font-headline-sm text-headline-sm text-on-surface">Кластер C</span>
+<span class="w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center"></span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">&gt; 6:00 мин/км</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Любители и прогулочный темп</span>
+</button>
+</div>
+</div>
+<!-- Telemetry & Emergency Contact -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">watch</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Телеметрия</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">Garmin Instinct 2X</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-tertiary-container/20 text-tertiary font-label-badge text-label-badge font-bold">Подключен</span>
+</div>
+<div class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">contact_phone</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Экстренный контакт</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">+7 701 ••• •• 42</span>
+</div>
+</div>
+<button class="font-label-badge text-label-badge text-primary hover:underline">Изменить</button>
+</div>
+</div>
+</div>
+<!-- 3. Block: Equipment & Starter Pack -->
+<div class="flex flex-col gap-space-md p-space-lg rounded-xl bg-surface-container shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Снаряжение и стартовый пакет</h2>
+</div>
+<span class="font-label-badge text-label-badge text-primary-container">Выдача: 28 ноября с 18:15</span>
+</div>
+<!-- 4 Items Included Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-7 h-7 rounded-md bg-tertiary-container/20 text-tertiary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Нагрудный номер с RFID-чипом</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Индивидуальный номер участника с микрочипом хронометража</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-7 h-7 rounded-md bg-tertiary-container/20 text-tertiary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Светоотражающий браслет серии</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Светоотражающая экипировка для безопасности на ночном маршруте</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-7 h-7 rounded-md bg-tertiary-container/20 text-tertiary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Изотоник на пит-стопе (2.5 км)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Гидратация и поддержка электролитов в контрольной точке</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-7 h-7 rounded-md bg-tertiary-container/20 text-tertiary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-bold">Цифровая медаль в Зал Славы</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Вечный цифровой артефакт в профиле QuestFit с метаданными заезда</span>
+</div>
+</div>
+</div>
+<!-- Optional Equipment Rental Item -->
+<label class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-high cursor-pointer transition-colors group">
+<div class="flex items-center gap-space-md">
+<input checked="" class="w-5 h-5 rounded bg-surface-container-lowest text-primary-container accent-primary-container cursor-pointer" type="checkbox"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-body-md text-body-md text-on-surface font-bold group-hover:text-primary transition-colors">Аренда налобного бегового фонаря QuestFit Lumos</span>
+<span class="px-space-xs py-0.5 rounded bg-tertiary-container/20 text-tertiary font-label-caps text-label-caps uppercase font-bold">PRO Бонус</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Мощный луч 300 лм с креплением на оголовье (обычно +300 ₸)</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold shrink-0">0 ₸</span>
+</label>
+</div>
+<!-- 4. Safety & Rules Agreement -->
+<div class="flex flex-col gap-space-md p-space-lg rounded-xl bg-surface-container shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-error-container/30 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Правила безопасности и согласие</h2>
+</div>
+<div class="flex flex-col gap-space-sm">
+<label class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low cursor-pointer">
+<input checked="" class="w-5 h-5 rounded bg-surface-container-highest text-primary-container accent-primary-container cursor-pointer mt-0.5" id="agree-medical" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Я подтверждаю отсутствие медицинских противопоказаний для преодоления дистанции 5 км в ночное время и ознакомлен(а) с регламентом безопасности городского забега.
+            </span>
+</label>
+<label class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-low cursor-pointer">
+<input checked="" class="w-5 h-5 rounded bg-surface-container-highest text-primary-container accent-primary-container cursor-pointer mt-0.5" id="agree-telemetry" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Согласен(на) на фиксацию телеметрии и публикацию результатов в городском лидерборде Уральска и Алматы, а также передачу очков рейду гильдии «Северный ветер».
+            </span>
+</label>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (~35% / 4 cols) - Sticky Summary Card -->
+<div class="xl:col-span-4 sticky top-20 flex flex-col gap-space-lg">
+<div class="flex flex-col p-space-lg rounded-xl bg-surface-container shadow-[0_0_40px_rgba(255,156,98,0.08)]">
+<!-- Header & Slot Capacity Status -->
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-headline-sm text-headline-sm text-on-surface">Стартовый слот и зачёт</span>
+<span class="px-space-sm py-1 rounded-full bg-tertiary-container/20 text-tertiary font-label-caps text-label-caps uppercase font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>Свободная бронь</span>
+</span>
+</div>
+<!-- Slot Availability Meter -->
+<div class="flex flex-col gap-1.5 mb-space-lg p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Заполненность старта</span>
+<span class="text-on-surface font-bold">Осталось 34 из 300 мест</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-primary to-primary-container h-full rounded-full w-[88.6%] transition-all"></div>
+</div>
+</div>
+<!-- Visual Ticket Badge with Monospace Serial & Barcode -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-highest p-space-md mb-space-lg">
+<div class="flex justify-between items-start mb-space-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-primary tracking-widest font-bold">QUESTFIT PASS</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">NIGHT RUN УРАЛ</span>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-on-surface-variant block uppercase">Слот атлета</span>
+<span class="font-headline-sm text-headline-sm text-primary font-mono tracking-wider font-bold">#NR-0842</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-space-xs text-body-sm font-body-sm text-on-surface-variant">
+<span>Кластер B (5:00-6:00)</span>
+<span>Волна: 19:05</span>
+</div>
+<!-- Stylized Inline SVG Barcode Graphic -->
+<div class="pt-space-sm flex flex-col items-center">
+<svg class="w-full h-9 text-on-surface opacity-80" fill="currentColor" viewbox="0 0 240 36" xmlns="http://www.w3.org/2000/svg">
+<rect height="36" width="3" x="0" y="0"></rect>
+<rect height="36" width="2" x="5" y="0"></rect>
+<rect height="36" width="4" x="9" y="0"></rect>
+<rect height="36" width="1" x="16" y="0"></rect>
+<rect height="36" width="3" x="19" y="0"></rect>
+<rect height="36" width="5" x="25" y="0"></rect>
+<rect height="36" width="2" x="33" y="0"></rect>
+<rect height="36" width="4" x="38" y="0"></rect>
+<rect height="36" width="1" x="45" y="0"></rect>
+<rect height="36" width="3" x="49" y="0"></rect>
+<rect height="36" width="6" x="55" y="0"></rect>
+<rect height="36" width="2" x="64" y="0"></rect>
+<rect height="36" width="4" x="68" y="0"></rect>
+<rect height="36" width="2" x="75" y="0"></rect>
+<rect height="36" width="5" x="80" y="0"></rect>
+<rect height="36" width="1" x="88" y="0"></rect>
+<rect height="36" width="4" x="92" y="0"></rect>
+<rect height="36" width="2" x="98" y="0"></rect>
+<rect height="36" width="3" x="103" y="0"></rect>
+<rect height="36" width="5" x="109" y="0"></rect>
+<rect height="36" width="2" x="117" y="0"></rect>
+<rect height="36" width="4" x="122" y="0"></rect>
+<rect height="36" width="1" x="129" y="0"></rect>
+<rect height="36" width="6" x="133" y="0"></rect>
+<rect height="36" width="3" x="142" y="0"></rect>
+<rect height="36" width="2" x="148" y="0"></rect>
+<rect height="36" width="5" x="153" y="0"></rect>
+<rect height="36" width="2" x="161" y="0"></rect>
+<rect height="36" width="4" x="166" y="0"></rect>
+<rect height="36" width="1" x="173" y="0"></rect>
+<rect height="36" width="3" x="177" y="0"></rect>
+<rect height="36" width="6" x="183" y="0"></rect>
+<rect height="36" width="2" x="192" y="0"></rect>
+<rect height="36" width="4" x="197" y="0"></rect>
+<rect height="36" width="2" x="204" y="0"></rect>
+<rect height="36" width="5" x="209" y="0"></rect>
+<rect height="36" width="1" x="217" y="0"></rect>
+<rect height="36" width="4" x="221" y="0"></rect>
+<rect height="36" width="3" x="228" y="0"></rect>
+<rect height="36" width="6" x="234" y="0"></rect>
+</svg>
+<span class="font-label-caps text-label-caps text-on-surface-variant font-mono tracking-widest mt-1">NR-24-KZ-0842-PRO</span>
+</div>
+</div>
+<!-- Reward Calculation List -->
+<div class="flex flex-col gap-space-sm mb-space-lg">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold">Расчёт наград и опыта</span>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Базовый финишный опыт:</span>
+<span class="text-on-surface font-bold">+800 XP</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span>Бонус клана «Северный ветер»:</span>
+<span class="material-symbols-outlined text-primary text-[14px]">stars</span>
+</span>
+<span class="text-primary font-bold">+400 XP</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Вклад в рейд «Железный колосс»:</span>
+<span class="text-secondary font-bold">+5.0 км урона</span>
+</div>
+<div class="h-px bg-surface-container-highest my-1"></div>
+<div class="flex justify-between items-center text-body-md font-body-md">
+<span class="text-on-surface font-bold">Итого награда за заезд:</span>
+<span class="text-tertiary font-headline-sm text-headline-sm font-bold">+1 200 XP</span>
+</div>
+</div>
+<!-- Cost Breakdown Section -->
+<div class="flex flex-col gap-1 p-space-md rounded-lg bg-surface-container-low mb-space-lg">
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Стоимость слота:</span>
+<span class="font-body-md text-body-md text-on-surface-variant line-through">3 500 ₸</span>
+</div>
+<div class="flex justify-between items-baseline">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold">БЕСПЛАТНО</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Входит в PRO-сезон 04</span>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-tertiary-container/20 text-tertiary font-label-caps text-label-caps uppercase font-bold">0 ₸ К ОПЛАТЕ</span>
+</div>
+</div>
+<!-- Primary CTA Button -->
+<button class="w-full h-12 rounded-xl bg-gradient-to-r from-primary-container to-[#ff843d] text-on-primary-container font-headline-sm text-headline-sm flex items-center justify-center gap-space-sm shadow-[0_8px_24px_rgba(255,156,98,0.35)] hover:shadow-[0_12px_28px_rgba(255,156,98,0.5)] hover:brightness-105 active:scale-[0.99] transition-all mb-space-md" id="confirm-registration-btn" onclick="handleConfirmation()">
+<span class="material-symbols-outlined text-[20px] font-bold">bolt</span>
+<span>Подтвердить участие</span>
+</button>
+<!-- Secondary Action -->
+<a class="w-full py-space-xs text-center text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm transition-colors" href="#">
+          ← Отмена и возврат к событию
+        </a>
+<!-- Guarantee & Security Footnote -->
+<div class="flex items-start gap-2 pt-space-md text-on-surface-variant/80 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-tertiary shrink-0 mt-0.5">verified_user</span>
+<span>Бронь слота защищена на 15 минут. Автосинхронизация с мобильным приложением и часами Garmin Instinct 2X.</span>
+</div>
+</div>
+<!-- Quick Guild Raid Progress Mini-Widget -->
+<div class="p-space-md rounded-xl bg-surface-container flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">military_tech</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Рейд Синдиката</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Железный колосс</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-badge text-label-badge text-tertiary block font-bold">HP Босса: 64%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ваш удар: 5 км</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Client-side Interactive Script for Timer, Selection, and Confirmation Modal -->
+<script>
+    // Reservation timer countdown
+    let secondsLeft = 14 * 60 + 59;
+    const timerEl = document.getElementById('reservation-timer');
+    if (timerEl) {
+      setInterval(() => {
+        if (secondsLeft <= 0) return;
+        secondsLeft--;
+        const mins = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+        const secs = (secondsLeft % 60).toString().padStart(2, '0');
+        timerEl.textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    // Cluster selector handler
+    function selectCluster(btn, clusterId) {
+      const container = document.getElementById('cluster-selector');
+      const buttons = container.querySelectorAll('button');
+      
+      buttons.forEach(b => {
+        b.className = 'flex flex-col gap-1 p-space-md rounded-lg text-left bg-surface-container-low hover:bg-surface-container-high transition-all';
+        const indicator = b.querySelector('.rounded-full');
+        if (indicator) {
+          indicator.className = 'w-4 h-4 rounded-full bg-surface-container-highest flex items-center justify-center';
+          indicator.innerHTML = '';
+        }
+        const title = b.querySelector('span:first-child');
+        if (title) title.className = 'font-headline-sm text-headline-sm text-on-surface';
+      });
+
+      btn.className = 'flex flex-col gap-1 p-space-md rounded-lg text-left bg-surface-container-high shadow-[0_0_20px_rgba(255,156,98,0.12)] transition-all';
+      const indicator = btn.querySelector('.rounded-full');
+      if (indicator) {
+        indicator.className = 'w-4 h-4 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container';
+        indicator.innerHTML = '<span class="material-symbols-outlined text-[12px] font-bold">check</span>';
+      }
+      const title = btn.querySelector('span:first-child');
+      if (title) title.className = 'font-headline-sm text-headline-sm text-primary';
+    }
+
+    // Confirmation Handler
+    function handleConfirmation() {
+      const medCheck = document.getElementById('agree-medical');
+      const telCheck = document.getElementById('agree-telemetry');
+      
+      if (!medCheck.checked || !telCheck.checked) {
+        alert('Пожалуйста, подтвердите регламент безопасности и телеметрии.');
+        return;
+      }
+
+      const btn = document.getElementById('confirm-registration-btn');
+      btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Бронирование...</span>';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.className = 'w-full h-12 rounded-xl bg-tertiary text-on-tertiary font-headline-sm text-headline-sm flex items-center justify-center gap-space-sm shadow-[0_0_30px_rgba(78,236,135,0.3)] transition-all mb-space-md';
+        btn.innerHTML = '<span class="material-symbols-outlined text-[20px] font-bold">check_circle</span><span>Слот #NR-0842 Подтвержден!</span>';
+      }, 900);
+    }
+  </script>
+</div></main></div></body></html>

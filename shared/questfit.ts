@@ -114,8 +114,8 @@ export const workoutTypeLabels: Record<WorkoutType, string> = {
 };
 
 export const defaultPreferences: ProfilePreferences = {
-  weeklyGoalMinutes: 300,
-  city: "Екатеринбург",
+  weeklyGoalMinutes: 150,
+  city: "Алматы",
   notificationsEnabled: true,
 };
 
@@ -195,6 +195,27 @@ export function buildDashboard(
       description: "Преодолеть 10 км",
       unlocked: totals.distanceKm >= 10,
       progress: Math.min(100, Math.round((totals.distanceKm / 10) * 100)),
+    },
+    {
+      slug: "active-hour",
+      title: "Час в движении",
+      description: "Записать суммарно 60 минут активности",
+      unlocked: totals.minutes >= 60,
+      progress: Math.min(100, Math.round(totals.minutes / 60 * 100)),
+    },
+    {
+      slug: "all-rounder",
+      title: "Разносторонний атлет",
+      description: "Попробовать три разных вида активности",
+      unlocked: new Set(workouts.map((workout) => workout.type)).size >= 3,
+      progress: Math.min(100, Math.round(new Set(workouts.map((workout) => workout.type)).size / 3 * 100)),
+    },
+    {
+      slug: "thousand-xp",
+      title: "Первая тысяча",
+      description: "Заработать 1 000 XP за тренировки",
+      unlocked: totals.workoutXp >= 1000,
+      progress: Math.min(100, Math.round(totals.workoutXp / 10)),
     },
   ];
 

@@ -7,6 +7,7 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: path.join(rootDir, "github-pages"),
+  publicDir: path.join(rootDir, "public"),
   base: "/questfit/",
   plugins: [react()],
   resolve: {

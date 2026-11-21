@@ -71,15 +71,12 @@ export async function createTeam(userId: number, name: string, goalKm: number) {
   if (await getTeamForUser(userId)) throw new TeamError("Сначала выйдите из текущей команды.", 409);
   const code = createInviteCode();
   const now = Date.now();
-  const created = await database()
-    .prepare("INSERT INTO teams (name, invite_code, goal_km, leader_user_id, created_at) VALUES (?, ?, ?, ?, ?)")
-    .bind(name, code, goalKm, userId, now)
-    .run();
-  const teamId = Number(created.meta.last_row_id);
-  await database()
-    .prepare("INSERT INTO team_members (team_id, user_id, role, joined_at) VALUES (?, ?, 'leader', ?)")
-    .bind(teamId, userId, now)
-    .run();
+  await database().batch([
+    database().prepare("INSERT INTO teams (name, invite_code, goal_km, leader_user_id, created_at) VALUES (?, ?, ?, ?, ?)")
+      .bind(name, code, goalKm, userId, now),
+    database().prepare("INSERT INTO team_members (team_id, user_id, role, joined_at) SELECT id, ?, 'leader', ? FROM teams WHERE invite_code = ?")
+      .bind(userId, now, code),
+  ]);
   return getTeamForUser(userId);
 }
 
@@ -135,6 +132,28 @@ export async function kickTeamMember(userId: number, targetUserId: number) {
   if (targetUserId === userId) throw new TeamError("Для выхода используйте отдельную кнопку.");
   const target = team.members.find((member) => member.userId === targetUserId);
   if (!target) throw new TeamError("Участник не найден.", 404);
-  await database().prepare("DELETE FROM team_members WHERE team_id = ? AND user_id = ?").bind(team.id, targetUserId).run();
+  await database().prepare(
+    "DELETE FROM team_members WHERE team_id = ? AND user_id = ? AND EXISTS (SELECT 1 FROM teams WHERE id = ? AND leader_user_id = ?)",
+  ).bind(team.id, targetUserId, team.id, userId).run();
+  return getTeamForUser(userId);
+}
+
+export async function transferTeamLeadership(userId: number, targetUserId: number) {
+  const team = await getTeamForUser(userId);
+  if (!team || team.leaderId !== userId) throw new TeamError("Только лидер может передать управление.", 403);
+  if (targetUserId === userId || !team.members.some((member) => member.userId === targetUserId)) {
+    throw new TeamError("Выберите другого участника команды.", 400);
+  }
+  const result = await database().batch([
+    database().prepare(
+      `UPDATE teams SET leader_user_id = ? WHERE id = ? AND leader_user_id = ?
+       AND EXISTS (SELECT 1 FROM team_members WHERE team_id = ? AND user_id = ?)`,
+    ).bind(targetUserId, team.id, userId, team.id, targetUserId),
+    database().prepare(
+      `UPDATE team_members SET role = CASE WHEN user_id = ? THEN 'leader' ELSE 'member' END
+       WHERE team_id = ? AND EXISTS (SELECT 1 FROM teams WHERE id = ? AND leader_user_id = ?)`,
+    ).bind(targetUserId, team.id, team.id, targetUserId),
+  ]);
+  if (!result[0].meta.changes) throw new TeamError("Состав изменился. Обновите страницу.", 409);
   return getTeamForUser(userId);
 }

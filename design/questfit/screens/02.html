@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QuestFit — прокачивай себя в реальности</title>
+<!-- Tailwind CSS CDN with forms & container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom configuration for QuestFit colors and fonts -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#FF9C62',
+              'orange-hover': '#FF8A47',
+              dark: '#090A0E',
+              card: '#14161E',
+              'card-border': '#232733',
+              input: '#0C0E14',
+              'input-border': '#232634',
+              tab: '#2C303E',
+              subtext: '#9C9FA8',
+              muted: '#656A79'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Typography Styles -->
+<style data-purpose="typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #090A0E;
+      color: #F4F1EB;
+    }
+  </style>
+<!-- Custom layout & glow effects -->
+<style data-purpose="visual-effects">
+    .modal-shadow {
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+    .orange-glow {
+      box-shadow: 0 4px 20px -2px rgba(255, 156, 98, 0.35);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #232733;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#090A0E] text-[#F4F1EB] min-h-screen overflow-hidden select-none relative">
+<!-- BEGIN: DashboardBackground (Matches Screen_2 behind modal) -->
+<div class="w-full min-h-screen filter blur-[2px] opacity-25 pointer-events-none flex" data-purpose="dashboard-content">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-[#1B1E29] p-6 flex flex-col justify-between shrink-0">
+<div class="space-y-8">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF9C62] to-[#E86D32] flex items-center justify-center text-black font-bold">
+            ⚔
+          </div>
+<div>
+<div class="font-black text-sm tracking-wider uppercase">QUESTFIT</div>
+<div class="text-[10px] text-brand-subtext tracking-widest uppercase">Raid &amp; Train</div>
+</div>
+</div>
+<nav class="space-y-2">
+<div class="text-[11px] font-semibold tracking-wider text-brand-muted uppercase px-3 py-1">ИГРА</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1D212D] text-white font-medium text-sm">
+<span>⊞</span> Обзор
+          </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-subtext hover:bg-[#151822] text-sm">
+<span>🏆</span> Квесты
+          </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-subtext hover:bg-[#151822] text-sm">
+<span>👥</span> Команда
+          </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-subtext hover:bg-[#151822] text-sm">
+<span>🛡</span> Арена
+          </a>
+</nav>
+</div>
+<div class="p-3 bg-[#141620] rounded-xl border border-[#202534] text-xs">
+<div class="flex justify-between items-center mb-1 text-[11px] text-brand-subtext">
+<span>PRO-СЕЗОН 04</span>
+<span class="text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded text-[10px]">В топ-12%</span>
+</div>
+<div class="h-1.5 bg-[#232736] rounded-full overflow-hidden mt-2">
+<div class="bg-brand-orange h-full w-2/3 rounded-full"></div>
+</div>
+</div>
+</aside>
+<!-- Main Workspace Behind Modal -->
+<main class="flex-1 p-8 space-y-6">
+<!-- Top Bar -->
+<header class="flex justify-between items-center pb-4 border-b border-[#1B1E29]">
+<div class="flex items-center gap-6 text-sm text-brand-subtext">
+<span>📅 Понедельник, 5 Октября</span>
+<span class="flex items-center gap-1.5 text-brand-orange font-medium">⚡ Режим героя: включён</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full bg-[#181B26] border border-[#232736] flex items-center justify-center text-sm">🔔</button>
+<button class="bg-[#FF9C62] text-black px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5">
+<span>👤+</span> Регистрация
+          </button>
+</div>
+</header>
+<!-- Hero Banner Banner Grid -->
+<div class="grid grid-cols-3 gap-6">
+<div class="col-span-2 bg-[#141620] border border-[#202534] rounded-2xl p-7 relative">
+<span class="text-xs uppercase font-bold tracking-wider text-brand-orange">⚡ ЛИЧНЫЙ ПРОГРЕСС</span>
+<h2 class="text-3xl font-extrabold mt-3 mb-2 leading-tight">
+            Атлет, сегодня ты становишься <span class="text-[#FF9C62]">сильнее.</span>
+</h2>
+<p class="text-brand-subtext text-sm mb-12">Ещё 2 квеста до дневного комбо. Не рви темп — держи победную серию.</p>
+<div class="w-full bg-[#202434] h-2.5 rounded-full overflow-hidden">
+<div class="bg-brand-orange w-3/4 h-full rounded-full"></div>
+</div>
+</div>
+<!-- Streak Stats Card -->
+<div class="bg-[#141620] border border-[#202534] rounded-2xl p-7 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="p-2 bg-[#FF9C62]/10 text-brand-orange rounded-lg">🔥</span>
+<span class="text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded text-[11px]">АКТИВНА</span>
+</div>
+<div class="mt-4 text-xs font-semibold text-brand-subtext">УДАРНАЯ СЕРИЯ</div>
+<div class="text-5xl font-black mt-1">12 <span class="text-base font-normal text-brand-subtext">дней</span></div>
+</div>
+<div class="text-xs text-brand-subtext flex items-center gap-1">
+<span class="text-emerald-400">✓</span> Личный рекорд: 18 дней
+          </div>
+</div>
+</div>
+</main>
+</div>
+<!-- END: DashboardBackground -->
+<!-- BEGIN: ModalBackdropOverlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#05070A]/80 backdrop-blur-[6px]" data-purpose="modal-overlay">
+<!-- BEGIN: AuthenticationModal -->
+<div class="w-full max-w-[460px] bg-[#14161E] border border-[#232733] rounded-[24px] p-8 modal-shadow relative animate-in fade-in zoom-in-95 duration-200" data-purpose="auth-dialog-card">
+<!-- Close Button -->
+<button aria-label="Закрыть модальное окно" class="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-brand-subtext hover:text-white hover:bg-[#1E222D] transition-colors duration-150 text-xl font-light" data-purpose="modal-close-trigger" onclick="alert('Закрыть окно')" type="button">
+        ✕
+      </button>
+<!-- Modal Header Logo Badge -->
+<div class="flex items-center gap-2.5 mb-5" data-purpose="brand-header">
+<div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF9C62] to-[#EE763B] flex items-center justify-center text-black font-extrabold text-sm shadow-sm">
+          ⚔
+        </div>
+<span class="font-extrabold tracking-wider text-sm uppercase text-[#F4F1EB]">QUESTFIT</span>
+</div>
+<!-- Headline and Subtitle -->
+<div class="mb-6" data-purpose="auth-headings">
+<h1 class="text-[26px] font-bold text-[#F4F1EB] tracking-tight leading-tight" id="modal-title">
+          Начни свою серию
+        </h1>
+<p class="text-sm text-brand-subtext mt-1.5 font-normal" id="modal-subtitle">
+          Один аккаунт для квестов, команды и прогресса.
+        </p>
+</div>
+<!-- Segmented Tab Switcher (Регистрация / Вход) -->
+<div class="grid grid-cols-2 p-1 bg-[#0F1117] border border-[#202432] rounded-xl mb-6" data-purpose="tab-switcher">
+<button class="py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 bg-[#2C303E] text-white shadow-sm" id="tab-register" onclick="setAuthMode('register')" type="button">
+          Регистрация
+        </button>
+<button class="py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 text-brand-subtext hover:text-white" id="tab-login" onclick="setAuthMode('login')" type="button">
+          Вход
+        </button>
+</div>
+<!-- Interactive Form -->
+<form class="space-y-4" data-purpose="auth-form" onsubmit="event.preventDefault(); handleFormSubmit();">
+<!-- Field: Name (Hidden during Login mode) -->
+<div class="space-y-1.5 transition-all duration-150" id="field-group-name">
+<label class="block text-xs font-medium text-brand-subtext" for="user-name">
+            Имя
+          </label>
+<input class="w-full bg-[#0C0E14] border border-[#232634] rounded-xl px-4 py-3.5 text-sm text-[#F4F1EB] placeholder-stone-500 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-colors" id="user-name" name="name" placeholder="Как к вам обращаться" type="text"/>
+</div>
+<!-- Field: Email -->
+<div class="space-y-1.5">
+<label class="block text-xs font-medium text-brand-subtext" for="user-email">
+            Электронная почта
+          </label>
+<input class="w-full bg-[#0C0E14] border border-[#232634] rounded-xl px-4 py-3.5 text-sm text-[#F4F1EB] placeholder-stone-500 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-colors" id="user-email" name="email" placeholder="you@example.com" required="" type="email"/>
+</div>
+<!-- Field: Password -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="block text-xs font-medium text-brand-subtext" for="user-password">
+              Пароль
+            </label>
+<a class="hidden text-[11px] text-brand-orange hover:underline" href="#" id="forgot-password-link" onclick="event.preventDefault(); alert('Восстановление пароля отправлено на ваш email');">
+              Забыли пароль?
+            </a>
+</div>
+<input class="w-full bg-[#0C0E14] border border-[#232634] rounded-xl px-4 py-3.5 text-sm text-[#F4F1EB] placeholder-stone-500 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-colors" id="user-password" name="password" placeholder="Минимум 8 символов" required="" type="password"/>
+</div>
+<!-- Primary Action Button -->
+<div class="pt-2">
+<button class="w-full bg-[#FF9C62] hover:bg-[#FF8A47] active:scale-[0.99] text-[#0C0E14] font-bold text-sm py-3.5 px-4 rounded-xl transition-all duration-150 orange-glow flex items-center justify-center cursor-pointer" id="submit-button" type="submit">
+            Создать аккаунт
+          </button>
+</div>
+<!-- Legal Disclaimer Footer -->
+<p class="text-[11px] leading-relaxed text-[#757A88] text-center pt-2 px-3" data-purpose="terms-disclaimer" id="form-disclaimer">
+          Продолжая, вы принимаете правила сервиса и политику конфиденциальности.
+        </p>
+</form>
+</div>
+<!-- END: AuthenticationModal -->
+</div>
+<!-- END: ModalBackdropOverlay -->
+<!-- BEGIN: InteractiveTabLogic -->
+<script data-purpose="tab-switcher-logic">
+    let currentAuthMode = 'register';
+
+    /**
+     * Switch between Registration and Login modes seamlessly
+     * @param {'register' | 'login'} mode
+     */
+    function setAuthMode(mode) {
+      currentAuthMode = mode;
+      
+      const tabRegister = document.getElementById('tab-register');
+      const tabLogin = document.getElementById('tab-login');
+      const fieldGroupName = document.getElementById('field-group-name');
+      const nameInput = document.getElementById('user-name');
+      const submitButton = document.getElementById('submit-button');
+      const modalTitle = document.getElementById('modal-title');
+      const modalSubtitle = document.getElementById('modal-subtitle');
+      const forgotPasswordLink = document.getElementById('forgot-password-link');
+      const formDisclaimer = document.getElementById('form-disclaimer');
+
+      if (mode === 'register') {
+        // Tab styling
+        tabRegister.className = "py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 bg-[#2C303E] text-white shadow-sm";
+        tabLogin.className = "py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 text-brand-subtext hover:text-white";
+
+        // Form adjustments
+        fieldGroupName.style.display = 'block';
+        nameInput.setAttribute('required', 'true');
+        submitButton.textContent = 'Создать аккаунт';
+        modalTitle.textContent = 'Начни свою серию';
+        modalSubtitle.textContent = 'Один аккаунт для квестов, команды и прогресса.';
+        forgotPasswordLink.classList.add('hidden');
+        formDisclaimer.textContent = 'Продолжая, вы принимаете правила сервиса и политику конфиденциальности.';
+      } else {
+        // Tab styling
+        tabLogin.className = "py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 bg-[#2C303E] text-white shadow-sm";
+        tabRegister.className = "py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 text-brand-subtext hover:text-white";
+
+        // Form adjustments
+        fieldGroupName.style.display = 'none';
+        nameInput.removeAttribute('required');
+        submitButton.textContent = 'Войти';
+        modalTitle.textContent = 'С возвращением в строй';
+        modalSubtitle.textContent = 'Продолжайте свою серию тренировок и битв.';
+        forgotPasswordLink.classList.remove('hidden');
+        formDisclaimer.innerHTML = 'Еще нет аккаунта? <a href="#" onclick="setAuthMode(\'register\'); return false;" class="text-brand-orange hover:underline">Зарегистрироваться</a>';
+      }
+    }
+
+    /**
+     * Submit notification handler
+     */
+    function handleFormSubmit() {
+      const email = document.getElementById('user-email').value;
+      if (currentAuthMode === 'register') {
+        const name = document.getElementById('user-name').value;
+        alert(`Добро пожаловать в QuestFit, ${name || 'Атлет'}! Аккаунт (${email}) успешно создан.`);
+      } else {
+        alert(`Вход выполнен успешно для: ${email}`);
+      }
+    }
+  </script>
+<!-- END: InteractiveTabLogic -->
+</body></html>

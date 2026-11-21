@@ -1,171 +1,239 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import {
-  Activity,
-  Bike,
-  Dumbbell,
-  Flame,
-  Footprints,
-  Medal,
-  Plus,
-  Sparkles,
-  Timer,
-  Trash2,
-  Trophy,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import type { DashboardData, NewWorkoutInput, WorkoutType } from "@/shared/questfit";
-import { workoutTypeLabels } from "@/shared/questfit";
+import { useState, type FormEvent } from "react";
+import { Activity, Bike, CalendarDays, Dumbbell, Footprints, Medal, Timer, TrendingUp, Zap } from "lucide-react";
+import { calculateWorkoutXp, workoutTypeLabels, type DashboardData, type NewWorkoutInput, type WorkoutEntry, type WorkoutType } from "@/shared/questfit";
+import { Action, Back, dateLabel, Empty, Field, FormError, formatNumber as num, Go, Meter, navigate, Stat } from "./portal-ui";
 
-const workoutIcons = {
-  strength: Dumbbell,
-  run: Activity,
-  walk: Footprints,
-  cycling: Bike,
-  mobility: Sparkles,
-} satisfies Record<WorkoutType, typeof Activity>;
-
-type ProgressSectionProps = {
-  dashboard: DashboardData;
-  onCreateWorkout: (workout: NewWorkoutInput) => Promise<void>;
-  onDeleteWorkout: (workoutId: number) => Promise<void>;
+const activityIcons = { run: Activity, strength: Dumbbell, walk: Footprints, cycling: Bike, mobility: Timer };
+const activityHints: Record<WorkoutType, string> = {
+  run: "Темп, дистанция и выносливость", walk: "Спокойная или быстрая прогулка",
+  cycling: "Велосипед, велотренажёр или трейл", strength: "Зал, силовые и упражнения с весом",
+  mobility: "Растяжка, восстановление и работа с подвижностью",
 };
+const types = Object.keys(workoutTypeLabels) as WorkoutType[];
 
-export function ProgressSection({ dashboard, onCreateWorkout, onDeleteWorkout }: ProgressSectionProps) {
-  const [workoutOpen, setWorkoutOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
-  const goalProgress = Math.min(100, Math.round((dashboard.totals.minutes / dashboard.preferences.weeklyGoalMinutes) * 100));
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+function calendarDate(date: Date) {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+}
 
-  async function submitWorkout(event: FormEvent<HTMLFormElement>) {
+export function weeklyMinutes(workouts: WorkoutEntry[], now = new Date()) {
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+  return workouts.reduce((total, workout) =>
+    workout.performedAt >= monday.getTime() && workout.performedAt <= now.getTime() ? total + workout.durationMinutes : total, 0);
+}
+
+function ActivityMark({ type }: { type: WorkoutType }) {
+  const Icon = activityIcons[type];
+  return <span className={`portal-icon activity-${type}`}><Icon size={20} aria-hidden="true" /></span>;
+}
+
+export function WorkoutList({ workouts }: { workouts: WorkoutEntry[] }) {
+  return <div className="portal-rows">
+    {workouts.map((workout) => <a className="portal-row" key={workout.id} href={`#workout/${workout.id}`}>
+      <ActivityMark type={workout.type} />
+      <span><strong>{workout.title}</strong><small>{dateLabel(workout.performedAt)} · {workoutTypeLabels[workout.type]}</small></span>
+      <span className="portal-row-end"><strong>{workout.durationMinutes} мин</strong><small>{workout.distanceKm ? `${num(workout.distanceKm)} км · ` : ""}+{workout.xp} XP</small></span>
+    </a>)}
+  </div>;
+}
+
+export function WorkoutJournal({ workouts }: { workouts: WorkoutEntry[] }) {
+  const [type, setType] = useState<"all" | WorkoutType>("all");
+  const [query, setQuery] = useState("");
+  const [period, setPeriod] = useState("all");
+  const end = new Date();
+  const start = new Date(end);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(end.getDate() - (Number(period) - 1));
+  const shown = workouts.filter((workout) =>
+    (type === "all" || workout.type === type) &&
+    (period === "all" || workout.performedAt >= start.getTime()) &&
+    workout.title.toLocaleLowerCase("ru-RU").includes(query.trim().toLocaleLowerCase("ru-RU")));
+  return <>
+    <div className="portal-stat-grid">
+      <Stat label="За неделю" value={`${weeklyMinutes(workouts, end)} мин`} detail="С понедельника" />
+      <Stat label="Тренировки в журнале" value={workouts.length} />
+      <Stat label="Дистанция в журнале" value={`${num(workouts.reduce((sum, item) => sum + item.distanceKm, 0))} км`} />
+    </div>
+    <section className="portal-panel">
+      <div className="portal-section-head"><h2>История тренировок</h2><Go to="workout/new" primary>Добавить тренировку</Go></div>
+      <div className="portal-filters">
+        <input aria-label="Поиск тренировок" type="search" placeholder="Найти по названию" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <select aria-label="Вид активности" value={type} onChange={(e) => setType(e.target.value as typeof type)}>
+          <option value="all">Все активности</option>{types.map((item) => <option key={item} value={item}>{workoutTypeLabels[item]}</option>)}
+        </select>
+        <select aria-label="Период" value={period} onChange={(e) => setPeriod(e.target.value)}>
+          <option value="all">Всё время</option><option value="7">Последние 7 дней</option><option value="30">Последние 30 дней</option>
+        </select>
+      </div>
+      {shown.length ? <WorkoutList workouts={shown} /> : <p className="portal-muted">{workouts.length ? "По этим фильтрам ничего не найдено." : "Здесь появится первая записанная тренировка."}</p>}
+    </section>
+  </>;
+}
+
+export function ActivityChoice() {
+  return <>
+    <Back to="workouts">Журнал тренировок</Back>
+    <div className="portal-step"><span className="is-current">Вид активности</span><span>Показатели</span></div>
+    <div className="portal-choice-grid">{types.map((type) =>
+      <a className="portal-panel portal-choice" key={type} href={`#workout/new/${type}`}>
+        <ActivityMark type={type} /><strong>{workoutTypeLabels[type]}</strong><small>{activityHints[type]}</small>
+      </a>)}</div>
+  </>;
+}
+
+export function WorkoutForm({ type, onSave }: { type: WorkoutType; onSave: (input: NewWorkoutInput) => Promise<WorkoutEntry> }) {
+  const [duration, setDuration] = useState("30");
+  const [distance, setDistance] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setFormError("");
-    setSubmitting(true);
-    const form = new FormData(event.currentTarget);
-    const performedAt = new Date(`${String(form.get("date"))}T12:00:00`).getTime();
-    const workout: NewWorkoutInput = {
-      title: String(form.get("title") ?? "").trim(),
-      type: String(form.get("type") ?? "strength") as WorkoutType,
-      durationMinutes: Number(form.get("durationMinutes")),
-      distanceKm: Number(form.get("distanceKm")),
-      calories: Number(form.get("calories")),
-      performedAt,
-      notes: String(form.get("notes") ?? "").trim(),
-    };
-
+    setPending(true);
+    setError("");
+    const data = new FormData(event.currentTarget);
+    const today = calendarDate(new Date());
+    const date = String(data.get("date"));
     try {
-      if (workout.title.length < 2 || workout.durationMinutes < 5 || Number.isNaN(performedAt)) {
-        throw new Error("Заполните название, дату и длительность тренировки.");
-      }
-      await onCreateWorkout(workout);
-      setWorkoutOpen(false);
-    } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Не удалось добавить тренировку.");
+      const performedAt = date === today ? Date.now() : Date.parse(`${date}T12:00:00`);
+      if (!Number.isFinite(performedAt) || date > today) throw new Error("Укажите дату в прошлом или сегодня.");
+      const workout = await onSave({
+        type, performedAt, durationMinutes: Number(duration), distanceKm: Number(distance),
+        calories: Number(data.get("calories")), title: String(data.get("title")).trim(), notes: String(data.get("notes")).trim(),
+      });
+      navigate(`workout/${workout.id}`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Не удалось сохранить тренировку.");
     } finally {
-      setSubmitting(false);
+      setPending(false);
     }
   }
-
-  return (
-    <section className="qf-section qf-progress-section" id="progress">
-      <div className="qf-section-head qf-progress-head">
-        <div><span className="qf-kicker">PROGRESS LAB</span><h2>История и аналитика</h2></div>
-        <Button className="qf-add-workout" onClick={() => setWorkoutOpen(true)}><Plus aria-hidden="true" /> Записать тренировку</Button>
-      </div>
-
-      <div className="qf-metric-grid">
-        <article><Timer aria-hidden="true" /><span><small>Время</small><b>{dashboard.totals.minutes} мин</b></span></article>
-        <article><Activity aria-hidden="true" /><span><small>Дистанция</small><b>{dashboard.totals.distanceKm.toLocaleString("ru-RU")} км</b></span></article>
-        <article><Flame aria-hidden="true" /><span><small>Энергия</small><b>{dashboard.totals.calories.toLocaleString("ru-RU")} ккал</b></span></article>
-        <article><Sparkles aria-hidden="true" /><span><small>Опыт тренировок</small><b>+{dashboard.totals.workoutXp.toLocaleString("ru-RU")} XP</b></span></article>
-      </div>
-
-      <div className="qf-progress-layout">
-        <article className="qf-panel qf-history-panel">
-          <div className="qf-panel-head">
-            <div><span className="qf-kicker">ACTIVITY LOG</span><h2>Последние тренировки</h2></div>
-            <span className="qf-history-count">{dashboard.workouts.length} записей</span>
-          </div>
-          <div className="qf-goal-card">
-            <div><span>Недельная цель</span><b>{dashboard.totals.minutes} / {dashboard.preferences.weeklyGoalMinutes} мин</b></div>
-            <Progress value={goalProgress} className="qf-level-progress" aria-label={`Недельная цель выполнена на ${goalProgress}%`} />
-          </div>
-          <div className="qf-workout-list">
-            {dashboard.workouts.length === 0 ? (
-              <div className="qf-empty-workouts"><Activity aria-hidden="true" /><p>История пока пуста.<br /><span>Добавьте первую тренировку.</span></p></div>
-            ) : dashboard.workouts.slice(0, 6).map((workout) => {
-              const Icon = workoutIcons[workout.type];
-              return (
-                <div className="qf-workout-row" key={workout.id}>
-                  <span className={`qf-workout-type ${workout.type}`}><Icon aria-hidden="true" /></span>
-                  <div><b>{workout.title}</b><small>{new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" }).format(workout.performedAt)} · {workoutTypeLabels[workout.type]}</small></div>
-                  <p><b>{workout.durationMinutes} мин</b><small>{workout.distanceKm > 0 ? `${workout.distanceKm.toLocaleString("ru-RU")} км · ` : ""}+{workout.xp} XP</small></p>
-                  <button onClick={() => void onDeleteWorkout(workout.id)} aria-label={`Удалить тренировку ${workout.title}`}><Trash2 aria-hidden="true" /></button>
-                </div>
-              );
-            })}
-          </div>
-        </article>
-
-        <div className="qf-progress-side">
-          <article className="qf-panel qf-leaderboard-panel">
-            <div className="qf-panel-head"><div><span className="qf-kicker">CITY LEAGUE</span><h2>Рейтинг города</h2></div><Trophy aria-hidden="true" /></div>
-            <div className="qf-leaderboard-list">
-              {dashboard.leaderboard.map((entry) => (
-                <div className={entry.currentUser ? "current" : ""} key={`${entry.position}-${entry.name}`}>
-                  <strong>{entry.position}</strong><span>{entry.accent}</span><p><b>{entry.name}</b><small>{entry.xp.toLocaleString("ru-RU")} XP</small></p>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="qf-panel qf-achievement-panel">
-            <div className="qf-panel-head"><div><span className="qf-kicker">BADGES</span><h2>Достижения</h2></div><Medal aria-hidden="true" /></div>
-            <div className="qf-achievement-list">
-              {dashboard.achievements.map((achievement) => (
-                <div className={achievement.unlocked ? "unlocked" : ""} key={achievement.slug}>
-                  <span><Medal aria-hidden="true" /></span>
-                  <p><b>{achievement.title}</b><small>{achievement.description}</small></p>
-                  <strong>{achievement.unlocked ? "ГОТОВО" : `${achievement.progress}%`}</strong>
-                </div>
-              ))}
-            </div>
-          </article>
+  return <>
+    <Back to="workout/new">Вид активности</Back>
+    <div className="portal-step"><span>{workoutTypeLabels[type]}</span><span className="is-current">Показатели</span></div>
+    <div className="portal-columns">
+      <form className="portal-panel portal-form" onSubmit={save}>
+        <Field label="Название"><input name="title" placeholder="Например, лёгкая пробежка" required minLength={2} maxLength={80} /></Field>
+        <Field label="Дата"><input name="date" type="date" defaultValue={calendarDate(new Date())} max={calendarDate(new Date())} required /></Field>
+        <div className="portal-form-pair">
+          <Field label="Длительность, мин"><input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} min={5} max={600} required /></Field>
+          <Field label="Дистанция, км"><input type="number" value={distance} onChange={(e) => setDistance(e.target.value)} min={0} max={300} step=".01" placeholder="0" /></Field>
         </div>
-      </div>
+        <Field label="Энергозатраты, ккал"><input name="calories" type="number" min={0} max={10000} placeholder="Необязательно" /></Field>
+        <Field label="Заметка"><textarea name="notes" rows={3} maxLength={300} placeholder="Как прошла тренировка?" /></Field>
+        <FormError error={error} />
+        <Action primary type="submit" disabled={pending}>{pending ? "Сохранение…" : "Сохранить тренировку"}</Action>
+      </form>
+      <aside className="portal-panel portal-side-info"><ActivityMark type={type} /><h2>{workoutTypeLabels[type]}</h2>
+        <p>Запись попадёт в журнал и обновит вашу недельную цель.</p>
+        <div className="portal-xp"><Zap size={17} aria-hidden="true" /> +{calculateWorkoutXp({ durationMinutes: Number(duration), distanceKm: Number(distance) }) || 0} XP</div>
+      </aside>
+    </div>
+  </>;
+}
 
-      <Dialog open={workoutOpen} onOpenChange={setWorkoutOpen}>
-        <DialogContent className="qf-info-dialog qf-workout-dialog">
-          <DialogHeader><DialogTitle>Записать тренировку</DialogTitle><DialogDescription>Результат попадёт в историю, аналитику и рейтинг.</DialogDescription></DialogHeader>
-          <form className="qf-workout-form" onSubmit={submitWorkout}>
-            <div className="qf-field"><Label htmlFor="workout-title">Название</Label><Input id="workout-title" name="title" placeholder="Например, лёгкий бег" minLength={2} maxLength={80} required /></div>
-            <div className="qf-form-pair">
-              <div className="qf-field"><Label htmlFor="workout-type">Тип</Label><select id="workout-type" name="type" defaultValue="run">{Object.entries(workoutTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
-              <div className="qf-field"><Label htmlFor="workout-date">Дата</Label><Input id="workout-date" name="date" type="date" defaultValue={today} max={today} required /></div>
-            </div>
-            <div className="qf-form-triple">
-              <div className="qf-field"><Label htmlFor="workout-duration">Минуты</Label><Input id="workout-duration" name="durationMinutes" type="number" min={5} max={600} defaultValue={45} required /></div>
-              <div className="qf-field"><Label htmlFor="workout-distance">Километры</Label><Input id="workout-distance" name="distanceKm" type="number" min={0} max={300} step="0.1" defaultValue={0} required /></div>
-              <div className="qf-field"><Label htmlFor="workout-calories">Ккал</Label><Input id="workout-calories" name="calories" type="number" min={0} max={10000} defaultValue={300} required /></div>
-            </div>
-            <div className="qf-field"><Label htmlFor="workout-notes">Комментарий</Label><textarea id="workout-notes" name="notes" maxLength={300} placeholder="Самочувствие, темп или результаты" /></div>
-            {formError && <p className="qf-auth-error" role="alert">{formError}</p>}
-            <Button type="submit" className="qf-sheet-action" disabled={submitting}>{submitting ? "Сохраняем…" : "Добавить тренировку"}</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+export function WorkoutDetails({ workout, onDelete, editable }: { workout?: WorkoutEntry; onDelete: (id: number) => Promise<void>; editable: boolean }) {
+  const [confirm, setConfirm] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  if (!workout) return <Empty title="Тренировка не найдена" text="Откройте другую запись в журнале."><Go to="workouts">К журналу</Go></Empty>;
+  const pace = workout.distanceKm > 0 ? Math.round(workout.durationMinutes * 60 / workout.distanceKm) : 0;
+  async function remove() {
+    if (!workout) return;
+    setPending(true);
+    setError("");
+    try { await onDelete(workout.id); navigate("workouts"); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось удалить тренировку."); }
+    finally { setPending(false); }
+  }
+  return <>
+    <Back to="workouts">Журнал тренировок</Back>
+    <div className="portal-stat-grid">
+      <Stat label="Длительность" value={`${workout.durationMinutes} мин`} />
+      <Stat label="Дистанция" value={`${num(workout.distanceKm)} км`} detail={pace > 0 ? `${Math.floor(pace / 60)}:${String(pace % 60).padStart(2, "0")} мин/км` : undefined} />
+      <Stat label="Опыт" value={`+${workout.xp} XP`} detail={`${workout.calories} ккал`} />
+    </div>
+    <section className="portal-panel portal-side-info"><ActivityMark type={workout.type} /><h2>{workout.title}</h2>
+      <p>{dateLabel(workout.performedAt)} · {workoutTypeLabels[workout.type]}</p>
+      {workout.notes && <p className="portal-note">{workout.notes}</p>}
+      <div className="portal-actions"><Go to="progress" primary>Смотреть прогресс</Go>
+        {editable && !confirm && <Action className="is-danger" onClick={() => setConfirm(true)}>Удалить запись</Action>}
+      </div>
+      {confirm && <div className="portal-confirm"><p>Удалить тренировку из журнала и пересчитать XP?</p><div className="portal-actions">
+        <Action className="is-danger" onClick={() => void remove()} disabled={pending}>Удалить</Action>
+        <Action onClick={() => setConfirm(false)} disabled={pending}>Отмена</Action></div></div>}
+      <FormError error={error} />
     </section>
-  );
+  </>;
+}
+
+export function ProgressSection({ dashboard }: { dashboard: DashboardData }) {
+  const [period, setPeriod] = useState(7);
+  const today = new Date();
+  const days = Array.from({ length: period }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - period + index + 1);
+    const key = calendarDate(date);
+    const total = dashboard.workouts.filter((item) => calendarDate(new Date(item.performedAt)) === key)
+      .reduce((minutes, item) => minutes + item.durationMinutes, 0);
+    return { key, label: period === 7 ? date.toLocaleDateString("ru-RU", { weekday: "short" }) : String(date.getDate()), total };
+  });
+  const peak = Math.max(1, ...days.map((day) => day.total));
+  const week = weeklyMinutes(dashboard.workouts);
+  const goal = dashboard.preferences.weeklyGoalMinutes;
+  return <>
+    <div className="portal-stat-grid">
+      <Stat label="Текущая неделя" value={`${week} / ${goal} мин`} detail={week >= goal ? "Цель достигнута" : `До цели ${goal - week} мин`} />
+      <Stat label={`За ${period} дней`} value={`${days.reduce((sum, day) => sum + day.total, 0)} мин`} />
+      <Stat label="XP за тренировки" value={num(dashboard.totals.workoutXp)} />
+    </div>
+    <section className="portal-panel">
+      <div className="portal-section-head"><h2>Время в движении</h2><div className="portal-segments">
+        {[7, 30].map((value) => <button type="button" key={value} aria-pressed={value === period} onClick={() => setPeriod(value)}>{value} дней</button>)}
+      </div></div>
+      <div className="portal-chart" aria-label="Минуты активности по дням">
+        {days.map(({ key, label, total }, index) => <div key={key} className="portal-bar" aria-label={`${key}: ${total} мин`} title={`${key}: ${total} мин`}>
+          <div><span className={index === days.length - 1 ? "current" : ""} style={{ height: `${total / peak * 100}%` }} /></div>
+          <small>{period === 7 || index % 5 === 0 || index === days.length - 1 ? label : " "}</small>
+        </div>)}
+      </div>
+    </section>
+    <div className="portal-columns is-balanced">
+      <section className="portal-panel portal-side-info"><TrendingUp size={22} /><h2>Недельная цель</h2><Meter value={week / goal * 100} label="Выполнение недельной цели" /><Go to="goal">Изменить цель</Go></section>
+      <section className="portal-panel portal-side-info"><Medal size={22} /><h2>Результаты</h2><div className="portal-actions"><Go to="achievements">Достижения</Go><Go to="leaderboard">Рейтинг</Go></div></section>
+    </div>
+  </>;
+}
+
+export function Achievements({ dashboard }: { dashboard: DashboardData }) {
+  const [onlyUnlocked, setOnlyUnlocked] = useState(false);
+  const earned = dashboard.achievements.filter((item) => item.unlocked).length;
+  return <section className="portal-panel">
+    <div className="portal-section-head"><h2>Награды {earned} / {dashboard.achievements.length}</h2><Action aria-pressed={onlyUnlocked} onClick={() => setOnlyUnlocked(!onlyUnlocked)}>{onlyUnlocked ? "Показать все" : "Только полученные"}</Action></div>
+    <div className="portal-choice-grid">
+      {dashboard.achievements.filter((item) => !onlyUnlocked || item.unlocked).map((item) => <article className="portal-choice portal-tile" key={item.slug}>
+        <span className={`portal-icon ${item.unlocked ? "activity-strength" : ""}`}><Medal size={23} aria-hidden="true" /></span>
+        <strong>{item.title}</strong><small>{item.description}</small><Meter value={item.progress} label={item.title} />
+        <small>{item.unlocked ? "Получено" : `${item.progress}% выполнено`}</small>
+      </article>)}
+    </div>
+    {onlyUnlocked && !earned && <p className="portal-muted">Запишите тренировку, чтобы получить первую награду.</p>}
+  </section>;
+}
+
+export function Leaderboard({ dashboard, demo }: { dashboard: DashboardData; demo: boolean }) {
+  const entries = [...dashboard.leaderboard].sort((a, b) => b.xp - a.xp);
+  return <section className="portal-panel">
+    <div className="portal-section-head"><h2>Рейтинг · {dashboard.preferences.city}</h2>{demo && <span className="portal-chip">Демо</span>}</div>
+    {!entries.length && <p className="portal-muted">Пока нет результатов для этого города.</p>}
+    <div className="portal-rows">
+      {entries.map((item, i) => <div key={item.position} className={`portal-row ${item.currentUser ? "is-me" : ""}`}>
+        <span className="portal-rank">{i + 1}</span><span><strong>{item.name}</strong>{item.currentUser && <small>Ваш результат</small>}</span>
+        <strong className="portal-row-end">{num(item.xp)} XP</strong>
+      </div>)}
+    </div>
+  </section>;
 }

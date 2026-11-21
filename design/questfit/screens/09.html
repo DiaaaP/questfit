@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ru"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-tint": "#ffb68e",
+          "outline": "#a28c81",
+          "primary-container": "#ff9c62",
+          "background": "#111319",
+          "on-primary-container": "#763200",
+          "on-background": "#e2e2ea",
+          "surface-container-low": "#191b22",
+          "on-error-container": "#ffdad6",
+          "on-secondary-container": "#c6d4ff",
+          "tertiary-container": "#23cf6e",
+          "secondary-fixed": "#dae2ff",
+          "on-secondary-fixed-variant": "#0040a0",
+          "surface-container-highest": "#33343b",
+          "on-tertiary": "#003919",
+          "on-error": "#690005",
+          "error-container": "#93000a",
+          "surface-variant": "#33343b",
+          "on-tertiary-fixed": "#00210c",
+          "inverse-primary": "#964915",
+          "outline-variant": "#54433a",
+          "on-primary-fixed-variant": "#773300",
+          "secondary": "#b2c5ff",
+          "tertiary": "#4eec87",
+          "surface": "#111319",
+          "on-tertiary-fixed-variant": "#005226",
+          "tertiary-fixed-dim": "#40e17e",
+          "on-tertiary-container": "#005226",
+          "error": "#ffb4ab",
+          "primary-fixed-dim": "#ffb68e",
+          "on-surface-variant": "#dac1b6",
+          "on-secondary": "#002c72",
+          "secondary-fixed-dim": "#b2c5ff",
+          "on-primary-fixed": "#331200",
+          "on-secondary-fixed": "#001847",
+          "on-surface": "#e2e2ea",
+          "surface-container-high": "#282a30",
+          "primary": "#ffc3a4",
+          "primary-fixed": "#ffdbca",
+          "surface-container": "#1d1f26",
+          "inverse-surface": "#e2e2ea",
+          "on-primary": "#542200",
+          "surface-container-lowest": "#0c0e14",
+          "surface-dim": "#111319",
+          "tertiary-fixed": "#63ff97",
+          "surface-bright": "#373940",
+          "inverse-on-surface": "#2e3037",
+          "secondary-container": "#0154cc"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-md": "1rem",
+          "space-xl": "2rem",
+          "space-sm": "0.625rem",
+          "space-xs": "0.375rem",
+          "gutter": "1.25rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "headline-hero-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "label-caps": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "body-md": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-badge": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-hero": [
+            "Plus Jakarta Sans"
+          ],
+          "title-level": [
+            "Plus Jakarta Sans"
+          ]
+        },
+        "fontSize": {
+          "headline-hero-mobile": [
+            "30px",
+            {
+              "lineHeight": "36px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "800"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-caps": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.08em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-sm": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-md": [
+            "22px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-badge": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-hero": [
+            "44px",
+            {
+              "lineHeight": "52px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "800"
+            }
+          ],
+          "title-level": [
+            "48px",
+            {
+              "lineHeight": "48px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "800"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface-container-lowest font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-[240px] bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="px-space-md pt-space-lg pb-space-md flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-[0_0_24px_-4px_rgba(255,156,98,0.4)]"><span class="material-symbols-outlined text-[24px]">local_fire_department</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm uppercase tracking-wider text-primary font-bold leading-none">QUESTFIT</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mt-1">RAID &amp; TRAIN</span></div></div><div class="px-space-md mt-space-md"><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider px-space-xs">МЕНЮ АТЛЕТА</span></div><nav class="mt-space-xs px-space-sm flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-bold shadow-[0_0_20px_-4px_rgba(255,156,98,0.3)]"><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="главная" href="#"><span class="material-symbols-outlined text-[20px]">home</span><span>Главная</span></a><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="квесты" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span><span>Квесты</span></a><a aria-current="page" class="flex items-center gap-3 px-space-sm py-2 rounded-xl transition-colors bg-primary-container text-on-primary-container font-bold shadow-[0_0_20px_-4px_rgba(255,156,98,0.3)]" data-path="тренировки" href="#"><span class="material-symbols-outlined text-[20px]">fitness_center</span><span>Тренировки</span></a><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="прогресс" href="#"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span>Прогресс</span></a><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="команда" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Команда</span></a><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="арена" href="#"><span class="material-symbols-outlined text-[20px]">shield</span><span>Арена</span></a><a class="flex items-center gap-3 px-space-sm py-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="профиль" href="#"><span class="material-symbols-outlined text-[20px]">person</span><span>Профиль</span></a></nav></div><div class="p-space-sm flex flex-col gap-space-sm"><div class="bg-surface-container rounded-xl p-space-sm flex flex-col gap-2 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps text-primary uppercase font-bold">PRO-СЕЗОН 04</span><span class="font-label-badge text-label-badge px-space-xs py-0.5 rounded-full bg-surface-container-high text-tertiary font-bold">В топ-12%</span></div><div class="flex justify-between items-baseline"><span class="font-body-sm text-body-sm text-on-surface-variant">Ранг: <span class="text-on-surface font-semibold">Рейнджер</span></span><span class="font-label-badge text-label-badge text-primary-fixed-dim font-bold">2,480 XP</span></div><div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary-container rounded-full w-3/4 shadow-[0_0_12px_rgba(255,156,98,0.5)]"></div></div></div><div class="bg-surface-container-high rounded-xl p-space-sm flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center font-headline-sm text-on-primary-container font-bold text-[14px]">АК</div><div class="flex flex-col min-w-0 flex-1"><div class="flex items-center gap-1.5"><span class="font-body-md text-body-md text-on-surface font-bold truncate">Айдана К.</span><span class="font-label-caps text-[9px] leading-tight px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-extrabold">8 ур.</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Алматы · Синдикат</span></div></div></div></aside><div class="pl-[240px]"><header class="fixed top-0 left-[240px] right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-1 text-on-surface-variant hover:text-on-surface font-body-md text-body-md transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span>К тренировкам</span></a><span class="text-outline-variant font-body-sm">/</span><div class="flex items-center gap-2 font-body-sm text-body-sm"><span class="text-on-surface-variant">Тренировки</span><span class="text-outline-variant">/</span><span class="text-on-surface-variant">Кардио</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Забег по набережной</span></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-2 px-space-sm py-1 rounded-full bg-surface-container-high"><span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,236,135,0.8)]"></span><span class="font-label-badge text-label-badge text-on-surface">Сезон активен: день 14</span></div><button class="flex items-center gap-2 h-10 px-space-md rounded-full bg-primary-container text-on-primary-container font-headline-sm text-body-md font-bold shadow-[0_4px_16px_rgba(255,156,98,0.25)] hover:shadow-[0_8px_24px_rgba(255,156,98,0.4)] transition-all"><span class="material-symbols-outlined text-[18px]">add</span><span>Записать тренировку</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full max-w-[1440px] mx-auto pt-16 px-space-xl pb-space-xl bg-surface-container-lowest"><div class="flex flex-col w-full gap-space-xl pb-space-xl">
+<!-- Status Notification Banner -->
+<section class="w-full rounded-2xl bg-surface-container-low p-space-md shadow-[0_1px_8px_rgba(0,0,0,0.24)] flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(78,236,135,0.2)]">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Тренировка сохранена</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary/15 text-tertiary font-label-caps text-label-caps uppercase tracking-wider">Синхронизировано</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+          Данные синхронизированы с профилем атлета и зачтены в клановый рейд «Железный колосс».
+        </p>
+</div>
+</div>
+<div class="flex items-center self-start md:self-auto gap-2 px-space-sm py-1.5 rounded-xl bg-surface-container text-on-surface-variant font-body-sm text-body-sm shrink-0">
+<span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+<span>Сегодня, 19:15 – 19:43</span>
+</div>
+</section>
+<!-- Workout Header & Log Quote Section -->
+<section class="flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-space-sm py-1 rounded-full bg-primary/10 text-primary font-label-caps text-label-caps uppercase tracking-wider">
+        Вечерний кардио-забег
+      </span>
+<span class="px-space-sm py-1 rounded-full bg-secondary-container/20 text-secondary font-label-caps text-label-caps uppercase tracking-wider">
+        Городской трек
+      </span>
+<span class="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm pl-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+        Парк им. Первого Президента / Набережная
+      </span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<h1 class="font-headline-hero text-headline-hero text-on-surface tracking-tight">
+          Пробежка 4.2 км
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1">
+          Плановый одиночный выезд за черту города · Аэробная прокачка выносливости
+        </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1.5 rounded-xl bg-surface-container font-label-badge text-label-badge text-primary-fixed-dim">
+          Сложность: Норма
+        </span>
+<span class="px-3 py-1.5 rounded-xl bg-surface-container-high font-label-badge text-label-badge text-on-surface">
+          ID #TR-8842
+        </span>
+</div>
+</div>
+<!-- Athlete note block -->
+<div class="relative rounded-2xl bg-surface-container p-space-md flex items-start gap-space-sm overflow-hidden">
+<div class="w-1 self-stretch rounded-full bg-primary-container shrink-0"></div>
+<div class="flex flex-col gap-1 min-w-0">
+<span class="font-label-caps text-label-caps uppercase text-primary tracking-widest">Заметка атлета</span>
+<p class="font-body-md text-body-md text-on-surface italic leading-relaxed">
+          «Ровный комфортный темп, хорошая разминка перед вечерним отрядным рейдом. Пульс держался в аэробной зоне без скачков в анаэробный пик.»
+        </p>
+</div>
+</div>
+</section>
+<!-- Primary Metrics Grid (4 Hero Cards) -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Metric 1: Distance -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.2)] hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Дистанция</span>
+<span class="material-symbols-outlined text-[20px] text-secondary">straighten</span>
+</div>
+<div class="my-space-sm">
+<div class="font-title-level text-title-level text-on-surface font-extrabold tracking-tight">
+          4.2 <span class="font-headline-md text-headline-md font-medium text-on-surface-variant">км</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary font-body-sm text-body-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+0.4 км к прошлому забегу</span>
+</div>
+</div>
+<!-- Metric 2: Duration -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.2)] hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Время</span>
+<span class="material-symbols-outlined text-[20px] text-primary">timer</span>
+</div>
+<div class="my-space-sm">
+<div class="font-title-level text-title-level text-on-surface font-extrabold tracking-tight">
+          28 <span class="font-headline-md text-headline-md font-medium text-on-surface-variant">мин</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px]">motion_photos_on</span>
+<span>Чистое движение: 27:48</span>
+</div>
+</div>
+<!-- Metric 3: Pace -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.2)] hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Средний темп</span>
+<span class="material-symbols-outlined text-[20px] text-secondary">speed</span>
+</div>
+<div class="my-space-sm">
+<div class="font-title-level text-title-level text-on-surface font-extrabold tracking-tight">
+          6:40 <span class="font-headline-md text-headline-md font-medium text-on-surface-variant">/км</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary font-body-sm text-body-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span>Лучший: 6:15 на 3-м км</span>
+</div>
+</div>
+<!-- Metric 4: Reward / XP -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col justify-between shadow-[0_0_32px_-8px_rgba(255,156,98,0.2)] bg-gradient-to-br from-surface-container via-surface-container to-primary-container/10">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-primary">Награда за сессию</span>
+<span class="material-symbols-outlined text-[20px] text-primary" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+</div>
+<div class="my-space-sm">
+<div class="font-title-level text-title-level text-primary font-extrabold tracking-tight">
+          +45 <span class="font-headline-md text-headline-md font-bold text-primary-fixed">XP</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary font-body-sm text-body-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span>+15 XP за серию 12 дней</span>
+</div>
+</div>
+</section>
+<!-- Detailed Data Sections (2-Column Asymmetric Layout) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Goal Progress & Km Splits (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-gutter">
+<!-- Weekly Goal Progress Card -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">flag</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Прогресс недельной цели</h2>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-badge text-label-badge font-bold">
+            72% выполнено
+          </span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-baseline font-body-md text-body-md">
+<span class="text-on-surface-variant">Кардио-норматив недели</span>
+<span class="text-on-surface font-bold">
+              18.0 <span class="text-on-surface-variant font-normal">/ 25.0 км</span>
+</span>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5">
+<div class="h-full rounded-full bg-gradient-to-r from-secondary-container via-primary-container to-primary" style="width: 72%;"></div>
+</div>
+</div>
+<!-- Weekly Days Micro-indicators -->
+<div class="grid grid-cols-7 gap-2 pt-2">
+<!-- Mon -->
+<div class="rounded-xl bg-surface-container-high p-2 flex flex-col items-center gap-1 text-center shadow-[0_0_12px_rgba(78,236,135,0.15)]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Пн</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-badge text-label-badge text-on-surface font-semibold">4.2 км</span>
+</div>
+<!-- Tue -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Вт</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+<!-- Wed -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Ср</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+<!-- Thu -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Чт</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+<!-- Fri -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Пт</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+<!-- Sat -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Сб</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+<!-- Sun -->
+<div class="rounded-xl bg-surface-container-low p-2 flex flex-col items-center gap-1 text-center opacity-60">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Вс</span>
+<span class="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span>
+<span class="font-label-badge text-label-badge text-outline">—</span>
+</div>
+</div>
+<!-- Clan Raid impact ribbon -->
+<div class="rounded-xl bg-surface-container-low p-space-sm flex items-center justify-between gap-space-sm mt-1">
+<div class="flex items-center gap-2.5 min-w-0">
+<span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Вклад в рейд «Железный колосс»</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Синдикат: Алматинский дозор</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-primary font-bold shrink-0">+4.2 км урона</span>
+</div>
+</div>
+<!-- Kilometer Splits Breakdown Card -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">bar_chart</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Сплиты по километрам</h2>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Темп и динамика отрезков</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Split 1 -->
+<div class="flex items-center gap-space-md p-space-sm rounded-xl bg-surface-container-low">
+<span class="font-body-md text-body-md font-bold text-on-surface w-12 shrink-0">1 км</span>
+<div class="flex-1 h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 78%;"></div>
+</div>
+<div class="flex items-center justify-end gap-2 w-28 shrink-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">6:52</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">/км</span>
+</div>
+</div>
+<!-- Split 2 -->
+<div class="flex items-center gap-space-md p-space-sm rounded-xl bg-surface-container-low">
+<span class="font-body-md text-body-md font-bold text-on-surface w-12 shrink-0">2 км</span>
+<div class="flex-1 h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 82%;"></div>
+</div>
+<div class="flex items-center justify-end gap-2 w-28 shrink-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">6:44</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">/км</span>
+</div>
+</div>
+<!-- Split 3 (Best Pace Highlight) -->
+<div class="flex items-center gap-space-md p-space-sm rounded-xl bg-surface-container-high shadow-[0_0_16px_rgba(255,156,98,0.12)]">
+<div class="flex items-center gap-1.5 w-12 shrink-0">
+<span class="font-body-md text-body-md font-bold text-primary">3 км</span>
+</div>
+<div class="flex-1 h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full shadow-[0_0_10px_rgba(255,156,98,0.5)]" style="width: 95%;"></div>
+</div>
+<div class="flex items-center justify-end gap-2 w-28 shrink-0">
+<span class="font-headline-sm text-headline-sm text-primary font-extrabold">6:15</span>
+<span class="font-label-caps text-label-caps text-primary font-bold">ТОП</span>
+</div>
+</div>
+<!-- Split 4 -->
+<div class="flex items-center gap-space-md p-space-sm rounded-xl bg-surface-container-low">
+<span class="font-body-md text-body-md font-bold text-on-surface w-12 shrink-0">4 км</span>
+<div class="flex-1 h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 85%;"></div>
+</div>
+<div class="flex items-center justify-end gap-2 w-28 shrink-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">6:38</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">/км</span>
+</div>
+</div>
+<!-- Split Sprint Final -->
+<div class="flex items-center gap-space-md p-space-sm rounded-xl bg-surface-container-low">
+<span class="font-body-md text-body-md font-bold text-on-surface-variant w-12 shrink-0">0.2 км</span>
+<div class="flex-1 h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 98%;"></div>
+</div>
+<div class="flex items-center justify-end gap-2 w-28 shrink-0">
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold">1:11</span>
+<span class="font-label-caps text-label-caps text-tertiary font-bold">ФИНИШ</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm pt-2">
+<span>Сглаживание GPS-трека: активно (Garmin Instinct 2X)</span>
+<span class="text-tertiary font-medium">Стабильность ритма 94%</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Health Telemetry & Athlete Card (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Health Parameters Telemetry -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[22px]">favorite</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Параметры здоровья</h2>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,236,135,0.7)]"></span>
+</div>
+<!-- Metric 1: Heart Rate -->
+<div class="rounded-xl bg-surface-container-low p-space-sm flex flex-col gap-2">
+<div class="flex justify-between items-baseline">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Средний пульс</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">
+              148 <span class="font-body-sm text-body-sm font-normal text-on-surface-variant">уд/мин</span>
+</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Максимальный: <strong class="text-on-surface">164 уд/мин</strong></span>
+<span class="text-tertiary font-semibold">Аэробная зона: 84%</span>
+</div>
+<!-- Pulse zone miniature sparkline -->
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden flex">
+<div class="h-full bg-secondary" style="width: 10%;"></div>
+<div class="h-full bg-tertiary" style="width: 74%;"></div>
+<div class="h-full bg-primary-container" style="width: 16%;"></div>
+</div>
+</div>
+<!-- Metric 2: Calories -->
+<div class="rounded-xl bg-surface-container-low p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Сожжено энергии</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Активный метаболизм</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">315 ккал</span>
+</div>
+<!-- Metric 3: Cadence -->
+<div class="rounded-xl bg-surface-container-low p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">directions_run</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Каденс</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Частота шагов</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">168 шаг/мин</span>
+</div>
+<!-- Metric 4: Elevation Gain -->
+<div class="rounded-xl bg-surface-container-low p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">terrain</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Набор высоты</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Рельеф набережной</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">+24 м</span>
+</div>
+</div>
+<!-- Athlete / Performer Card -->
+<div class="rounded-2xl bg-surface-container p-space-lg flex flex-col gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.2)]">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Исполнитель задания</span>
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center font-headline-md text-headline-md font-extrabold shadow-[0_0_20px_rgba(255,156,98,0.35)] shrink-0">
+            АК
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Айдана К.</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-label-caps text-[10px] font-extrabold">8 УР</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Рейнджер · Алматы</span>
+</div>
+</div>
+<div class="rounded-xl bg-surface-container-low p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Статус активности</span>
+</div>
+<span class="font-label-badge text-label-badge text-tertiary font-bold">12 дней подряд</span>
+</div>
+</div>
+<!-- Tactical Equipment Snapshot Mini -->
+<div class="rounded-2xl bg-surface-container-low p-space-md flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">watch</span>
+<span class="font-body-sm text-body-sm">Garmin Connect Sync v4.12</span>
+</div>
+<span class="font-label-caps text-label-caps text-tertiary uppercase">В сети</span>
+</div>
+</div>
+</section>
+<!-- Action Footer Bar -->
+<footer class="w-full pt-space-md border-t-0 flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<!-- Back to Journal -->
+<a class="w-full sm:w-auto h-12 px-space-lg rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-md text-body-md font-bold flex items-center justify-center gap-2 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Вернуться в журнал тренировок</span>
+</a>
+<!-- Action Group -->
+<div class="w-full sm:w-auto flex items-center justify-end gap-space-sm">
+<!-- Share / Export -->
+<button class="flex-1 sm:flex-none h-12 px-space-md rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-semibold flex items-center justify-center gap-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">share</span>
+<span>Поделиться результатом</span>
+</button>
+<!-- Restrained Destructive Action -->
+<button class="h-12 w-12 rounded-xl bg-surface-container hover:bg-error-container/20 text-on-surface-variant hover:text-error flex items-center justify-center transition-colors" title="Удалить запись тренировки" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</footer>
+</div></main></div></body></html>
