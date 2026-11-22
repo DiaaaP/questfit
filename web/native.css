@@ -1,0 +1,22 @@
+html { background: #0a0b10; }
+body { margin: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+:where(.qf-portal) :where(button, input, select, textarea) { font: inherit; }
+:where(.qf-portal) a { color: inherit; }
+.qf-portal [hidden] { display: none !important; }
+.portal-loading { padding: 24px; }
+.portal-medal { color: var(--ember); }
+:where(.portal-sidebar-identity) .portal-avatar:hover { border-color: var(--line); }
+@media (min-width: 841px) {
+  .portal-top-actions .portal-profile-shortcut { display: none; }
+}
+#notices {
+  position: fixed;
+  inset: auto 16px 16px auto;
+  z-index: 100;
+  max-width: min(370px, calc(100% - 32px));
+  color: #f6f3ee;
+  font: 600 .95rem/1.5 system-ui, sans-serif;
+}
+#notices:not(:empty) { padding: 12px 16px; background: #191c25; border: 1px solid #35394a; border-radius: 12px; }
+#notices[data-error="true"] { border-color: #a75b5b; }

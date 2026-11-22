@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Тренировки, ежедневные квесты, командные рейды и спортивные старты.">
+  <meta name="theme-color" content="#0a0b10">
+  <title>QuestFit</title>
+  <link rel="icon" href="./public/favicon.svg">
+  <link rel="stylesheet" href="./styles/questfit.css">
+  <link rel="stylesheet" href="./native.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div id="app" class="qf-portal">
+    <p class="portal-loading" id="initial-status">Загружаем QuestFit…</p>
+    <noscript><p class="portal-loading">Включите JavaScript, чтобы пользоваться QuestFit.</p></noscript>
+  </div>
+  <div id="notices" aria-live="polite" aria-atomic="true"></div>
+  <template id="portal">
+    <a class="portal-skip" href="#main-content" data-action="skip">К содержимому</a>
+    <button type="button" class="portal-scrim" data-action="menu-close" aria-label="Закрыть меню" hidden></button>
+    <aside class="portal-sidebar" id="portal-navigation">
+      <a class="portal-brand-link" href="#overview" aria-label="QuestFit, главная" id="brand"></a>
+      <button type="button" class="portal-mobile-close portal-icon-button" data-action="menu-close" aria-label="Закрыть меню"></button>
+      <nav aria-label="Основная навигация"></nav>
+      <div class="portal-sidebar-bottom"></div>
+    </aside>
+    <main class="portal-main" id="main-content" tabindex="-1">
+      <header class="portal-top">
+        <div class="portal-title-wrap">
+          <button type="button" class="portal-icon-button portal-menu-button" data-action="menu" aria-label="Открыть меню" aria-controls="portal-navigation" aria-expanded="false"></button>
+          <div><h1 id="screen-title"></h1><p id="screen-description"></p></div>
+        </div>
+        <div class="portal-actions portal-top-actions"></div>
+      </header>
+      <div id="screen-notes"></div>
+      <div class="portal-content" id="screen"></div>
+      <footer class="portal-footer"><strong>QuestFit</strong><span></span></footer>
+    </main>
+  </template>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "quests": [
+    {"id": 1, "title": "Разминка героя", "detail": "10 минут силовой разминки", "xp": 40, "category": "strength", "active": true},
+    {"id": 2, "title": "Пробежка 3 км", "detail": "Пробеги 3 км в своём темпе", "xp": 80, "category": "run", "active": true},
+    {"id": 3, "title": "Время пройтись", "detail": "20 минут прогулки на свежем воздухе", "xp": 30, "category": "walk", "active": true},
+    {"id": 4, "title": "Командная эстафета", "detail": "Добавь вклад в командный рейд", "xp": 120, "category": "team", "active": true}
+  ],
+  "events": [
+    {"id": -1, "slug": "night-run-ural", "title": "Night Run Урал", "location": "Уральск · Набережная Урала", "distanceKm": 5, "startAt": 1795874400000, "rewardXp": 150, "capacity": 120, "active": true, "registrations": 0}
+  ]
+}
