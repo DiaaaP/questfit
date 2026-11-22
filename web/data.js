@@ -1,6 +1,6 @@
 import { demoMode } from "./runtime.js";
 import { readLocal, storeLocal } from "./ui.js";
-import { buildDashboard, calculateWorkoutXp } from "./workout-data.js";
+import { buildDashboard, calculateWorkoutXp, defaultPreferences } from "./workout-data.js";
 
 export { demoMode };
 
@@ -27,6 +27,17 @@ const keys = Object.freeze({
   team: "qf_pages_team", admin: "qf_pages_admin", next: "qf_pages_next_admin_ids",
 });
 
+const directoryExamples = [
+  { id: -101, fullName: "Айжан Абдиева", city: "Астана", teamName: "Степной темп", goalKm: 90 },
+  { id: -102, fullName: "Арман Толеу", city: "Шымкент", teamName: "Южный маршрут", goalKm: 120 },
+];
+const exampleUsers = directoryExamples.map(({ id, fullName, city, teamName }) => ({
+  id, fullName, city, teamName, email: "—", workoutCount: 0, sample: true,
+}));
+const exampleTeams = directoryExamples.map(({ id, fullName, city, teamName, goalKm }) => ({
+  id, name: teamName, city, captainName: fullName, memberCount: 1, goalKm, sample: true,
+}));
+
 function localUser() {
   return localStorage.getItem(keys.session) === "true" ? readLocal(keys.account, null)?.user ?? null : null;
 }
@@ -36,10 +47,21 @@ function localAdmin() {
   const saved = readLocal(keys.admin, null);
   const dashboard = readLocal(keys.dashboard, null);
   const team = readLocal(keys.team, null);
+  const city = dashboard?.preferences?.city ?? defaultPreferences.city;
+  const captain = team?.members.find(member => member.userId === team.leaderId);
+  const users = user ? [{...user, city, createdAt: user.id, workoutCount: dashboard?.workouts.length ?? 0, teamName: team?.name ?? null}, ...exampleUsers] : [];
+  const teams = user ? [...exampleTeams] : [];
+  if (user && team && captain) {
+    teams.unshift({
+      id: team.id, name: team.name, captainName: captain.name,
+      city: captain.userId === user.id ? city : defaultPreferences.city,
+      memberCount: team.members.length, goalKm: team.goalKm,
+    });
+  }
   return {
     quests: saved?.quests ?? [],
     events: saved?.events ?? seed.events.map(event => ({...event, id: 1})),
-    users: user ? [{...user, createdAt: user.id, workoutCount: dashboard?.workouts.length ?? 0, teamName: team?.name ?? null}] : [],
+    users, teams,
   };
 }
 

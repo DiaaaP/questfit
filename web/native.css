@@ -7,6 +7,33 @@ body { margin: 0; }
 .portal-loading { padding: 24px; }
 .portal-medal { color: var(--ember); }
 :where(.portal-sidebar-identity) .portal-avatar:hover { border-color: var(--line); }
+.portal-directory { display: grid; min-width: 0; gap: 14px; }
+.portal-directory-controls { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.portal-directory-tabs a { padding: 7px 11px; border-radius: 7px; color: var(--muted); font-size: .88rem; font-weight: 650; }
+.portal-directory-tabs a[aria-current] { background: var(--raised); color: var(--ink); }
+.portal-directory-tabs a:hover { color: var(--ember); }
+.portal-directory-filter { width: min(100%, 240px); }
+.portal-directory-filter > small { display: block; margin-top: 5px; color: var(--muted); font-size: .81rem; }
+.portal-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 11px; }
+.portal-table-scroll:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+.portal-directory-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .9rem; }
+.portal-directory-table :is(th, td) { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.portal-directory-table thead { color: var(--muted); background: var(--raised); }
+.portal-directory-table thead th { white-space: nowrap; }
+.portal-directory-table tbody tr:last-child :is(th, td) { border-bottom: 0; }
+.portal-directory-table tbody th { font-weight: 650; overflow-wrap: anywhere; }
+.portal-directory-table td { min-width: 90px; overflow-wrap: anywhere; }
+.portal-directory-table small { display: block; color: var(--muted); font-weight: 400; }
+.portal-directory-table :is(th:nth-child(n+4), .portal-table-number) { text-align: right; font-variant-numeric: tabular-nums; }
+.portal-table-number { white-space: nowrap; }
+@media (max-width: 560px) {
+  .portal-directory-filter { width: 100%; }
+  .portal-directory-table { font-size: .8rem; }
+  .portal-directory-table :is(th, td) { padding: 8px 6px; }
+  .portal-directory-table thead th { white-space: normal; }
+  .portal-directory-table td { min-width: 0; }
+  .portal-directory-table td:nth-child(2) { overflow-wrap: normal; }
+}
 @media (min-width: 841px) {
   .portal-top-actions .portal-profile-shortcut { display: none; }
 }

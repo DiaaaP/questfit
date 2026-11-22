@@ -133,6 +133,34 @@ class QuestFitAPI(unittest.TestCase):
             self.assertEqual(self.client.post("/api/team", json={"action": "leave"}).json()["team"], None)
             self.assertEqual(len(member.get("/api/team").json()["team"]["members"]), 1)
 
+    def test_admin_directory_uses_city_of_current_captain(self):
+        owner = self.register(self.client, "directory-owner@example.test", "Капитан Алматы")
+        team = self.client.post("/api/team", json={"action": "create", "name": "Темп", "goalKm": 80}).json()["team"]
+        with TestClient(app) as member:
+            athlete = self.register(member, "directory-member@example.test", "Атлет Астаны")
+            profile = {"fullName": athlete["fullName"], "city": "Астана", "goal": "Подготовка к старту",
+                       "weeklyGoalMinutes": 180, "notificationsEnabled": True}
+            self.assertEqual(member.patch("/api/profile", json=profile).status_code, 200)
+            self.assertEqual(member.post("/api/team", json={"action": "join", "code": team["code"]}).status_code, 200)
+            self.assertEqual(member.get("/api/admin").status_code, 403)
+
+            directory = self.client.get("/api/admin").json()
+            users = {row["id"]: row for row in directory["users"]}
+            self.assertEqual(users[owner["id"]]["city"], "Алматы")
+            self.assertEqual(users[athlete["id"]]["city"], "Астана")
+            self.assertEqual(users[athlete["id"]]["teamName"], "Темп")
+            self.assertEqual(directory["teams"], [{
+                "id": team["id"], "name": "Темп", "captainName": "Капитан Алматы",
+                "city": "Алматы", "memberCount": 2, "goalKm": 80,
+            }])
+
+            moved = self.client.post("/api/team", json={"action": "transfer", "userId": athlete["id"]})
+            self.assertEqual(moved.status_code, 200)
+            updated = self.client.get("/api/admin").json()["teams"][0]
+            self.assertEqual(updated["city"], "Астана")
+            self.assertEqual(updated["captainName"], athlete["fullName"])
+            self.assertEqual(updated["memberCount"], 2)
+
     def test_existing_sqlite_and_compatible_password(self):
         legacy = self.path.with_name("legacy.sqlite3")
         with closing(sqlite3.connect(legacy)) as db:

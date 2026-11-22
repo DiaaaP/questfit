@@ -72,19 +72,69 @@ export function teamPreview(team, distance) {
   return num(team.totalKm) + " → " + num(team.totalKm + distance) + " км из " + num(team.goalKm) + " км";
 }
 
-export function adminView(view, { admin, demo, now }, selected) {
-  if (!admin) return empty("Загружаем админ-панель", "Получаем каталог и список пользователей.");
+function cityKey(value) {
+  return value.trim().toLocaleLowerCase("ru");
+}
+
+function adminDirectory(view, admin, selectedCity, demo) {
+  const isTeams = view === "teams";
+  const cities = new Map();
+  for (const { city } of [...admin.users, ...admin.teams]) {
+    const key = cityKey(city);
+    if (!cities.has(key)) cities.set(key, city);
+  }
+  const filter = cityKey(selectedCity);
+  const query = filter ? "?city=" + encodeURIComponent(filter) : "";
+  const entries = isTeams ? admin.teams : admin.users;
+  const shown = filter ? entries.filter(entry => cityKey(entry.city) === filter) : entries;
+  const headers = isTeams ? ["Команда", "Город", "Капитан", "Участники", "Цель рейда"]
+    : ["Имя и почта", "Город", "Команда", "Тренировки"];
+  return html`${back("admin", "Администрирование")}
+    <section class="portal-panel portal-directory">
+      <div class="portal-directory-controls">
+        <nav class="portal-segments portal-directory-tabs" aria-label="Таблицы администрирования">
+          <a href="#admin/users${query}" ${!isTeams && html`aria-current="page"`}>Пользователи</a>
+          <a href="#admin/teams${query}" ${isTeams && html`aria-current="page"`}>Команды</a>
+        </nav>
+        <div class="portal-directory-filter">
+          ${field("Город", html`<select data-directory-city ${isTeams && html`aria-describedby="captain-city-note"`}>
+            <option value="">Все города</option>
+            ${filter && !cities.has(filter) && html`<option value="${filter}" selected>${selectedCity}</option>`}
+            ${[...cities].sort((a, b) => a[1].localeCompare(b[1], "ru")).map(([key, label]) => html`
+              <option value="${key}" ${key === filter && "selected"}>${label}</option>`)}
+          </select>`)}
+          ${isTeams && html`<small id="captain-city-note">Город команды берётся из профиля капитана.</small>`}
+        </div>
+      </div>
+      ${demo && html`<p class="portal-muted">Строки «Пример» показывают, как работает фильтр в демо.</p>`}
+      <p class="portal-muted" role="status">Показано ${shown.length} из ${entries.length}</p>
+      <div class="portal-table-scroll" role="region" aria-label="Область прокрутки таблицы" tabindex="0">
+        <table class="portal-directory-table" aria-label="${isTeams ? "Список команд" : "Список пользователей"}">
+          <thead><tr>${headers.map(header => html`<th scope="col">${header}</th>`)}</tr></thead>
+          <tbody>${shown.map(entry => isTeams ? html`
+            <tr><th scope="row">${entry.name}${entry.sample && html`<small>Пример</small>`}</th><td>${entry.city}</td><td>${entry.captainName}</td>
+              <td class="portal-table-number">${num(entry.memberCount)}</td><td class="portal-table-number">${num(entry.goalKm)} км</td></tr>
+          ` : html`
+            <tr><th scope="row"><strong>${entry.fullName}</strong><small>${entry.sample ? "Пример" : entry.email}</small></th>
+              <td>${entry.city}</td><td>${entry.teamName || "Без команды"}</td><td class="portal-table-number">${num(entry.workoutCount)}</td></tr>
+          `)}</tbody>
+        </table>
+      </div>
+      ${!shown.length && html`<p class="portal-muted">${isTeams ? "Команд пока нет" : "Пользователей пока нет"}${filter ? " в выбранном городе." : "."}</p>`}
+    </section>`;
+}
+
+export function adminView(view, { admin, demo, now }, selected, city) {
+  if (!admin) return empty("Загружаем админ-панель", "Получаем каталог и списки пользователей и команд.");
+  if (view === "users" || view === "teams") return adminDirectory(view, admin, city, demo);
   if (view !== "quests" && view !== "events") return html`
-    <div class="portal-stat-grid">${stat("Пользователи", admin.users.length)}${stat("Квесты в редакторе", admin.quests.length)}${stat("Соревнования в редакторе", admin.events.length)}</div>
+    <div class="portal-stat-grid">${stat("Пользователи", admin.users.filter(user => !user.sample).length)}${stat("Квесты в редакторе", admin.quests.length)}${stat("Соревнования в редакторе", admin.events.length)}</div>
     <div class="portal-columns is-balanced">
       <section class="portal-panel portal-side-info">${icon("Zap", 24)}<h2>Квесты</h2><p>Публикуйте задания и управляйте наградами.</p>${go("admin/quests", "Редактор квестов", true)}</section>
       <section class="portal-panel portal-side-info">${icon("CalendarDays", 24)}<h2>Соревнования</h2><p>Меняйте расписание и доступность записи на старты.</p>${go("admin/events", "Редактор соревнований", true)}</section>
     </div>
-    <section class="portal-panel"><div class="portal-section-head"><h2>Пользователи</h2><span class="portal-chip">${icon("ShieldCheck", 16)} ${demo ? "Демо" : "Владелец"}</span></div>
-      ${rows(admin.users.map(item => html`<div class="portal-row"><span class="portal-icon">${icon("Users", 18)}</span>
-        <span><strong>${item.fullName}</strong><small>${item.email} · ${item.teamName || "Без команды"}</small></span>
-        ${!demo && html`<span class="portal-row-end">${item.workoutCount} тренировок</span>`}
-      </div>`))}
+    <section class="portal-panel"><div class="portal-section-head"><h2>Пользователи и команды</h2><span class="portal-chip">${icon("ShieldCheck", 16)} ${demo ? "Демо" : "Владелец"}</span></div>
+      <div class="portal-actions">${go("admin/users", "Таблица пользователей", true)}${go("admin/teams", "Таблица команд")}</div>
     </section>`;
 
   const isQuest = view === "quests";

@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
 from .database import ROOT, atomic, connect, database_path, initialize, now_ms
 from .domain import (
-    DEFAULT_EVENT, GOAL, activity, catalog, change_team, dashboard, events, preferences, quests,
+    DEFAULT_EVENT, GOAL, PREFERENCES, activity, catalog, change_team, dashboard, events, preferences, quests,
     rounded, team_state, update_event_progress, update_quest_progress, workouts,
 )
 
@@ -380,12 +380,23 @@ def save_team(data: TeamInput, user: User, db: Db):
 
 
 def admin_data(db):
-    return {"quests": quests(db), "events": events(db), "users": [dict(user) for user in db.execute("""
+    default_city = PREFERENCES["city"]
+    users = [dict(user) for user in db.execute("""
         SELECT u.id, u.full_name AS fullName, u.email, u.goal, u.created_at AS createdAt,
-               t.name AS teamName, (SELECT COUNT(*) FROM workout_logs WHERE user_id = u.id) AS workoutCount
-        FROM users u LEFT JOIN team_members m ON m.user_id = u.id LEFT JOIN teams t ON t.id = m.team_id
+               COALESCE(p.city, ?) AS city, t.name AS teamName,
+               (SELECT COUNT(*) FROM workout_logs WHERE user_id = u.id) AS workoutCount
+        FROM users u LEFT JOIN user_preferences p ON p.user_id = u.id
+        LEFT JOIN team_members m ON m.user_id = u.id LEFT JOIN teams t ON t.id = m.team_id
         ORDER BY u.id DESC
-    """)]}
+    """, (default_city,))]
+    teams = [dict(team) for team in db.execute("""
+        SELECT t.id, t.name, u.full_name AS captainName, COALESCE(p.city, ?) AS city,
+               (SELECT COUNT(*) FROM team_members WHERE team_id = t.id) AS memberCount, t.goal_km AS goalKm
+        FROM teams t JOIN users u ON u.id = t.leader_user_id
+        LEFT JOIN user_preferences p ON p.user_id = u.id
+        ORDER BY t.name COLLATE QF_CASEFOLD, t.id
+    """, (default_city,))]
+    return {"quests": quests(db), "events": events(db), "users": users, "teams": teams}
 
 
 @app.get("/api/admin")

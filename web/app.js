@@ -27,7 +27,8 @@ function route() {
   if (head === "event" && step === "join") view = "event/join";
   if ((head === "team" || head === "admin") && id) view = head + "/" + id;
   if (view === "team/raid") view = "team";
-  const proposed = new URLSearchParams(query).get("next") || "overview";
+  const params = new URLSearchParams(query);
+  const proposed = params.get("next") || "overview";
   const first = proposed.split("/")[0];
   const next = /^[a-z0-9/-]+$/.test(proposed) && !["login", "register"].includes(first) && Object.hasOwn(pages, first)
     ? proposed : "overview";
@@ -37,7 +38,7 @@ function route() {
   if (section === "event") section = "arena";
   if (["goal", "achievements", "leaderboard"].includes(section)) section = "progress";
   if (section === "notifications") section = "profile";
-  return { raw, view, id, step, next, section };
+  return { raw, view, id, step, next, section, city: params.get("city") ?? "" };
 }
 
 function notice(message, isError = false) {
@@ -72,6 +73,8 @@ function accountPrompt({ view, section }) {
   if (view === "event/join") return "Войдите, чтобы сохранить место на старте.";
   if (section === "team" && Object.hasOwn(pages, view))
     return "Аккаунт нужен для вступления в команду и сохранения вклада в общий рейд.";
+  if (section === "admin" && Object.hasOwn(pages, view))
+    return "Войдите в аккаунт владельца, чтобы открыть администрирование.";
   if (["profile", "goal", "notifications"].includes(view))
     return "Личные настройки и напоминания доступны после входа.";
   return "";
@@ -107,7 +110,7 @@ function viewContent(page, data, prompt) {
   if (page.section === "admin" && Object.hasOwn(pages, view)) {
     if (!isAdmin()) return empty("Доступ ограничен", "Управление каталогом доступно владельцу QuestFit.", go("overview", "На главную"));
     if (data.failures.admin) return unavailable("Админ-панель недоступна", data.failures.admin);
-    return adminView(id, data, ui.selected);
+    return adminView(id, data, ui.selected, page.city);
   }
   if (["profile", "goal", "notifications"].includes(view)) return account(view, data);
   return empty("Страница не найдена", "Выберите нужный раздел в меню.", go("overview", "На главную", true));
@@ -420,6 +423,16 @@ root.addEventListener("input", event => {
   }
 });
 
+root.addEventListener("change", event => {
+  const select = event.target;
+  if (!select.matches("[data-directory-city]")) return;
+  const path = route().view;
+  const query = select.value ? "?city=" + encodeURIComponent(select.value) : "";
+  history.replaceState(history.state, "", "#" + path + query);
+  render();
+  root.querySelector("[data-directory-city]").focus({preventScroll: true});
+});
+
 const actions = {
   skip: () => root.querySelector("#main-content")?.focus(),
   menu: () => {
@@ -526,6 +539,12 @@ window.addEventListener("hashchange", () => {
   closeMenu();
   render();
   scrollTo(0, 0);
+  const view = route().view;
+  if (state.ready && isAdmin() && ["admin/users", "admin/teams"].includes(view)) {
+    void refresh(["admin"]).then(() => {
+      if (route().view === view && !root.querySelector("[data-directory-city]:focus")) render();
+    });
+  }
 });
 window.addEventListener("keydown", event => {
   if (event.key === "Escape" && root.querySelector(".portal-sidebar.is-open")) closeMenu(true);
